@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+body {
+   font-family: "Mulish", sans-serif;
+   background-color: #f3f4f6;
+}
+
+/* Animasi background gradasi */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animated-bg {
+  background: linear-gradient(270deg, #c2e9fb, #fdfbfb, #e0c3fc);
+  background-size: 600% 600%;
+  animation: gradientShift 12s ease infinite;
+}
+
+/* Animasi glow bulatan */
+@keyframes floaty {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+.float-glow {
+  animation: floaty 6s ease-in-out infinite;
+}
+.delay {
+  animation-delay: 3s;
+}
