@@ -1,9 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
-import loadingReducer from "../features/loading/loadingSlice"; // ⬅️
+import darkModeReducer from "../features/darkMode/darkModeSlice";
+import loadingReducer from "../features/loading/loadingSlice";
 
 export const store = configureStore({
   reducer: {
-    loading: loadingReducer, // ⬅️ tambahkan ke store
+    darkMode: darkModeReducer,
+    loading: loadingReducer,
+    // reducers lain
   },
 });
 

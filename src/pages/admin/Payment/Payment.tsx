@@ -1,8 +1,8 @@
-import BaseLayout from "../BaseLayout";
+import BaseLayout from "../../../BaseLayout";
 
 const Payment = () => {
   return (
-    <BaseLayout activeUrl="/payment">
+    <BaseLayout>
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">Payment</h1>
         <p>Welcome to the Payment!</p>

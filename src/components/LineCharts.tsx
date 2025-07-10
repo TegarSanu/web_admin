@@ -1,22 +1,20 @@
-// src/components/LineChart.tsx
+// src/components/BarChart.tsx
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Tooltip,
   Legend,
   Title,
 } from "chart.js";
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 
 // Registrasi elemen-elemen yang diperlukan
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend
@@ -28,10 +26,9 @@ const data = {
     {
       label: "Pengunjung",
       data: [30, 45, 28, 60, 70],
-      borderColor: "#3b82f6", // warna biru Tailwind
-      backgroundColor: "rgba(59, 130, 246, 0.2)",
-      fill: true,
-      tension: 0.4, // untuk efek melengkung
+      backgroundColor: "#3b82f6", // warna biru Tailwind
+      borderRadius: 6,
+      barThickness: 40,
     },
   ],
 };
@@ -41,16 +38,47 @@ const options = {
   plugins: {
     legend: {
       position: "top" as const,
+      labels: {
+        font: {
+          family: "Mulish",
+        },
+      },
     },
     title: {
       display: true,
       text: "Grafik Pengunjung per Bulan",
+      font: {
+        family: "Mulish",
+        size: 18,
+      },
+    },
+  },
+  scales: {
+    x: {
+      ticks: {
+        font: {
+          family: "Mulish",
+        },
+      },
+      grid: {
+        display: false,
+      },
+    },
+    y: {
+      ticks: {
+        font: {
+          family: "Mulish",
+        },
+      },
+      grid: {
+        color: "#e5e7eb",
+      },
     },
   },
 };
 
-const LineChart = () => {
-  return <Line options={options} data={data} />;
+const BarChart = () => {
+  return <Bar options={options} data={data} />;
 };
 
-export default LineChart;
+export default BarChart;

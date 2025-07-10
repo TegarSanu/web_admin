@@ -1,19 +1,39 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setLoading } from "../redux/features/loading/loadingSlice";
+import { setData } from "../api/config";
 
 const Login = () => {
+  const dispatch = useDispatch();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const url = currentPath.split("/")[2];
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username && password) {
-      navigate("/");
+      dispatch(setLoading(true));
+      axios
+        .post(`admin/auth/login`, { email: username, password: password })
+        .finally(() => {
+          dispatch(setLoading(false));
+        })
+        .then((res) => {
+          setData("sessionId", res.data.data.sessionId);
+          setData("userInfo", res.data.data);
+          toast.success("Login sukses");
+          navigate(`/admin/${url}/dashboard`);
+        });
     } else {
-      alert("Username dan Password wajib diisi!");
+      toast.error("Username dan Password wajib diisi!");
     }
   };
 
@@ -26,7 +46,7 @@ const Login = () => {
       {/* Login Card */}
       <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-8 transition-all duration-300">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome Back 👋
+          Welcome {url === "admin" ? "Admin" : "Superadmin"} 👋
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">
@@ -40,7 +60,7 @@ const Login = () => {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
+              placeholder="Email"
               className="w-full pl-10 pr-4 py-2 rounded-lg bg-white border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 text-gray-700 placeholder-gray-400 transition"
             />
           </div>

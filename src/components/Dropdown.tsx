@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/app/store";
 
 const DropdownButton = ({ icon, children }: any) => {
   const [open, setOpen] = useState(false);
   const dropdownRef: any = useRef(null);
+  const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
 
   // Close dropdown if clicked outside
   useEffect(() => {
@@ -25,10 +28,12 @@ const DropdownButton = ({ icon, children }: any) => {
       </button>
 
       <div
-        className={`absolute right-0 mt-4 w-48 origin-top-right rounded-md shadow-lg z-50 transition-all duration-300 scheme-light:bg-white dark:bg-gray-800 hover:text-white ${
+        className={`${
+          darkMode ? "bg-gray-800" : "bg-white"
+        } absolute right-0 mt-4 w-auto origin-top-right rounded-xl p-3 shadow-lg z-50 transition-all duration-300 ${
           open
             ? "opacity-100 scale-100"
-            : "opacity-0 scale-95 pointer-events-none"
+            : "opacity-0 scale-80 pointer-events-none"
         }`}
       >
         <div className="py-1">{children}</div>

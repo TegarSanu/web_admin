@@ -1,9 +1,9 @@
-import BaseLayout from "../BaseLayout";
-import LineChart from "../components/LineCharts";
+import BaseLayout from "../../BaseLayout";
+import LineChart from "../../components/LineCharts";
 
 const Dashboard = () => {
   return (
-    <BaseLayout activeUrl="/">
+    <BaseLayout>
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
         <p>Welcome to the dashboard!</p>

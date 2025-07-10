@@ -1,13 +1,14 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import { getData, removeData } from "./config";
 
 export default function setupAxios() {
-  axios.defaults.baseURL = "https://barberking.cloud/backend/barberking/admin";
+  axios.defaults.baseURL = "https://solusiparking.com/backend/";
   axios.defaults.timeout = 30000;
 
   axios.interceptors.request.use(
     (config) => {
-      const sessionId = localStorage.getItem("sessionId");
+      const sessionId = getData("sessionId");
 
       if (sessionId && !config.headers.Authorization) {
         config.headers.Authorization = `Bearer ${sessionId}`;
@@ -27,7 +28,8 @@ export default function setupAxios() {
       const errorMessage =
         error.response?.data?.errors?.messages[0] ?? error.message;
       if (status === 401) {
-        localStorage.removeItem("sessionId");
+        removeData("sessionId");
+        removeData("userInfo");
       } else {
         toast.error(errorMessage);
       }

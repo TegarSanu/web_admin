@@ -1,7 +1,9 @@
+@import "@fontsource/mulish"; 
+@import "@fontsource/mulish/400.css";
 @import "tailwindcss";
 
 body {
-   font-family: "Mulish", sans-serif;
+   font-family: "Mulish";
    background-color: #f3f4f6;
 }
 
