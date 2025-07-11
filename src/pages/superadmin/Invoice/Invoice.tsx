@@ -1,4 +1,4 @@
-import BaseLayout from "../../../BaseLayout";
+import BaseLayout from "../BaseLayoutAdmin";
 
 const Invoice = () => {
   return (

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
@@ -13,9 +13,7 @@ const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const url = currentPath.split("/")[2];
+  const { role }: any = useParams();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +28,7 @@ const Login = () => {
           setData("sessionId", res.data.data.sessionId);
           setData("userInfo", res.data.data);
           toast.success("Login sukses");
-          navigate(`/admin/${url}/dashboard`);
+          navigate(`/${role}`, { replace: true });
         });
     } else {
       toast.error("Username dan Password wajib diisi!");
@@ -46,7 +44,7 @@ const Login = () => {
       {/* Login Card */}
       <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-8 transition-all duration-300">
         <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Welcome {url === "admin" ? "Admin" : "Superadmin"} 👋
+          Welcome {role === "company-dashboard" ? "Admin" : "Superadmin"} 👋
         </h2>
 
         <form onSubmit={handleLogin} className="space-y-5">

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../../redux/features/loading/loadingSlice";
-import BaseLayout from "../../../BaseLayout";
+import BaseLayout from "../BaseLayoutAdmin";
 import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,10 +9,10 @@ import {
   faAngleLeft,
   faAngleRight,
   faPencil,
-  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import EditCompany from "./EditCompany";
 import { useNavigate } from "react-router-dom";
+import TextField from "../../../components/TextField";
 
 const Company = () => {
   const dispatch = useDispatch();
@@ -20,6 +20,7 @@ const Company = () => {
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [companies, setCompanies] = useState<any[]>([]);
   const [editedCompany, setEditedCompany] = useState<any>(null);
+  const nameRef: any = useRef(null);
   const [paging, setPaging] = useState({
     page: 1,
     size: 10,
@@ -48,7 +49,20 @@ const Company = () => {
 
   useEffect(() => {
     getCompany();
-  }, [filter.page, filter.size]);
+  }, [filter]);
+
+  const handleFilterChange = (key: any, value: any) => {
+    if (nameRef.current) {
+      clearTimeout(nameRef.current);
+    }
+    nameRef.current = setTimeout(() => {
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        [key]: value,
+        page: 1,
+      }));
+    }, 600);
+  };
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= paging.totalPages) {
@@ -112,6 +126,18 @@ const Company = () => {
                 <p className="text-xl font-semibold">Data Company</p>
               </div>
             </div>
+            <div className="w-full p-4">
+              <div className="grid grid-cols-3 gap-4">
+                <TextField
+                  title="Nama Company"
+                  onChange={(e: any) => handleFilterChange("name", e)}
+                />
+                <TextField
+                  title="Inital"
+                  onChange={(e: any) => handleFilterChange("initial", e)}
+                />
+              </div>
+            </div>
             <div className="w-full p-4 flex justify-end">
               <button
                 onClick={() => navigate("add")}
@@ -167,12 +193,12 @@ const Company = () => {
                         >
                           <FontAwesomeIcon icon={faPencil} />
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => {}}
                           className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600 transition"
                         >
                           <FontAwesomeIcon icon={faTrash} />
-                        </button>
+                        </button> */}
                       </td>
                     </tr>
                   ))}

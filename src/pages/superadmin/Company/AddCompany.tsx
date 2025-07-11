@@ -9,7 +9,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import ImagePicker from "../../../components/ImageUploader";
 import PdfUploader from "../../../components/PdfUploader";
 import { toast } from "react-toastify";
-import BaseLayout from "../../../BaseLayout";
+import BaseLayout from "../BaseLayoutAdmin";
 import { useNavigate } from "react-router-dom";
 
 const AddCompany = () => {

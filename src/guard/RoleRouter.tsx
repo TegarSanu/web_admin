@@ -1,6 +1,3 @@
-// src/router/RoleRouter.tsx
-
-import React from "react";
 import { Routes, Route, useParams, Navigate } from "react-router-dom";
 import { rolePages } from "./RolePages";
 

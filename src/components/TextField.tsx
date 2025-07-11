@@ -5,10 +5,11 @@ interface TextFieldProps {
   title: string;
   placeHolder?: string;
   multiline?: boolean;
-  value: string;
+  value?: string;
   id?: string;
   className?: string;
   numberOnly?: boolean;
+  disabled?: boolean; // Tambahkan prop disabled
 }
 
 const TextField: React.FC<TextFieldProps> = ({
@@ -20,18 +21,18 @@ const TextField: React.FC<TextFieldProps> = ({
   id,
   className = "",
   numberOnly = false,
+  disabled = false, // Default false
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  const isActive = isFocused || value.length > 0;
+  const isActive = isFocused || (value ?? "").length > 0;
 
   useEffect(() => {
     if (String(value).length > 0) setIsFocused(true);
   }, [String(value)]);
 
-  const baseClass =
-    "w-full border border-gray-300 rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors";
+  const baseClass = `w-full border rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors border-gray-300`;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -54,11 +55,12 @@ const TextField: React.FC<TextFieldProps> = ({
           ref={inputRef as React.RefObject<HTMLTextAreaElement>}
           id={id}
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => !disabled && setIsFocused(true)}
           onBlur={() => (numberOnly ? setIsFocused(true) : setIsFocused(false))}
           className={baseClass}
           value={value}
           rows={4}
+          disabled={disabled} // Set disabled textarea
         />
       ) : (
         <input
@@ -66,10 +68,11 @@ const TextField: React.FC<TextFieldProps> = ({
           id={id}
           type="text"
           onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
+          onFocus={() => !disabled && setIsFocused(true)}
           onBlur={() => (numberOnly ? setIsFocused(true) : setIsFocused(false))}
           className={baseClass}
           value={value}
+          disabled={disabled} // Set disabled input
         />
       )}
       <label

@@ -5,9 +5,10 @@ import LoadingScreen from "./components/Loading";
 import { ToastContainer } from "react-toastify";
 import { useSelector } from "react-redux";
 import type { RootState } from "./redux/app/store";
-import RoleRouter from "./RoleRouter";
+import RoleRouter from "./guard/RoleRouter";
 import Login from "./pages/Login";
-import AdminGuard from "./AdminGuard";
+import AdminGuard from "./guard/AdminGuard";
+import SessionGuard from "./guard/SessionGuard";
 
 setupAxios();
 
@@ -17,9 +18,23 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="admin/:role" element={<AdminGuard />} />
-        <Route path="admin/:role/*" element={<RoleRouter />} />
-        <Route path="admin/:role/login" element={<Login />} />
+        <Route
+          path=":role"
+          element={
+            <SessionGuard>
+              <AdminGuard />
+            </SessionGuard>
+          }
+        />
+        <Route
+          path=":role/*"
+          element={
+            <SessionGuard>
+              <RoleRouter />
+            </SessionGuard>
+          }
+        />
+        <Route path=":role/login" element={<Login />} />
       </Routes>
       {/* LOADING & TOAST */}
       {loading && <LoadingScreen />}

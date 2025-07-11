@@ -10,13 +10,15 @@ import {
   faUsers,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import DropdownButton from "./components/Dropdown";
+import { useLocation, useNavigate } from "react-router-dom";
+import DropdownButton from "../../components/Dropdown";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "./redux/app/store";
+import type { RootState } from "../../redux/app/store";
 import { useMemo, useEffect, useState } from "react";
-import { toggleDarkMode } from "./redux/features/darkMode/darkModeSlice";
-import { getData } from "./api/config";
+import { toggleDarkMode } from "../../redux/features/darkMode/darkModeSlice";
+import { getData, removeData } from "../../api/config";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const BaseLayout = ({ children }: any) => {
   const navigate = useNavigate();
@@ -24,10 +26,21 @@ const BaseLayout = ({ children }: any) => {
   const user = getData("userInfo");
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [scrolled, setScrolled] = useState(false);
-  const { role } = useParams();
   const location = useLocation();
   const currentPath = location.pathname;
   const activeUrl = currentPath;
+
+  const logOut = () => {
+    axios
+      .post(`admin/auth/logout`, null)
+      .finally(() => {})
+      .then((res) => {
+        removeData("sessionId");
+        removeData("userInfo");
+        toast.success("Berhasil logout, silahkan login kembali");
+        navigate(`/admin-dashboard/login`);
+      });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,11 +59,11 @@ const BaseLayout = ({ children }: any) => {
   }, [darkMode]);
 
   const sidebarMenu = [
-    { name: "Dashboard", icon: faHome, url: `/admin/${role}/dashboard` },
-    { name: "Company", icon: faBuilding, url: `/admin/${role}/company` },
-    { name: "Payment", icon: faDollar, url: `/admin/${role}/payment` },
-    { name: "Invoice", icon: faMoneyBill, url: `/admin/${role}/invoice` },
-    { name: "Admin", icon: faUsers, url: `/admin/${role}/admin` },
+    { name: "Dashboard", icon: faHome, url: `/admin-dashboard` },
+    { name: "Company", icon: faBuilding, url: `/admin-dashboard/company` },
+    { name: "Payment", icon: faDollar, url: `/admin-dashboard/payment` },
+    { name: "Invoice", icon: faMoneyBill, url: `/admin-dashboard/invoice` },
+    { name: "Admin", icon: faUsers, url: `/admin-dashboard/admin` },
   ];
 
   const pageInfo = useMemo(() => {
@@ -93,7 +106,7 @@ const BaseLayout = ({ children }: any) => {
                 key={item.url}
                 onClick={() => navigate(item.url)}
                 className={`flex items-center gap-3 px-3 py-4 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 ${
-                  activeUrl.includes(item.url)
+                  activeUrl === item.url
                     ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow"
                     : darkMode
                     ? "text-gray-300 hover:bg-gray-700"
@@ -133,9 +146,11 @@ const BaseLayout = ({ children }: any) => {
                 <FontAwesomeIcon icon={faUserCircle} color="gray" size="xl" />
               }
             >
-              <div className={`py-2 px-4 text-sm rounded-md`}>{user.email}</div>
+              <div className={`py-2 px-4 text-sm rounded-md`}>
+                {user?.email}
+              </div>
               <div
-                onClick={() => navigate("/login")}
+                onClick={() => logOut()}
                 className={`py-2 px-4 text-sm rounded-md cursor-pointer flex gap-3 items-center ${
                   darkMode
                     ? "hover:bg-gray-200"

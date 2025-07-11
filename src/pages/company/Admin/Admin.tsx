@@ -1,4 +1,4 @@
-import BaseLayout from "../../../BaseLayout";
+import BaseLayout from "../../company/BaseLayoutCompany";
 
 const Admin = () => {
   return (

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../../redux/features/loading/loadingSlice";
-import BaseLayout from "../../../BaseLayout";
+import BaseLayout from "../../company/BaseLayoutCompany";
 import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

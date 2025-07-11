@@ -1,7 +1,7 @@
-import BaseLayout from "../../BaseLayout";
-import LineChart from "../../components/LineCharts";
+import BaseLayout from "../company/BaseLayoutCompany";
+import LineChart from "../../components/BarChart";
 
-const Dashboard = () => {
+const CompanyDashboard = () => {
   return (
     <BaseLayout>
       <div className="p-4">
@@ -14,4 +14,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default CompanyDashboard;
