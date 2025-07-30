@@ -3,11 +3,12 @@ import {
   faDollar,
   faHome,
   faLockOpen,
-  faMoneyBill,
   faMoon,
   faSun,
   faUserCircle,
   faUsers,
+  faBars,
+  faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -28,6 +29,19 @@ const BaseLayout = ({ children }: any) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
+
+  // Ambil & simpan state collapse sidebar
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    const stored = localStorage.getItem("isSidebarCollapsed");
+    return stored ? JSON.parse(stored) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "isSidebarCollapsed",
+      JSON.stringify(isSidebarCollapsed)
+    );
+  }, [isSidebarCollapsed]);
 
   const logOut = () => {
     axios
@@ -82,7 +96,6 @@ const BaseLayout = ({ children }: any) => {
 
   const isActivePath = (targetUrl: string) => {
     if (targetUrl === "/company-dashboard") {
-      // hanya cocok jika exact match
       return currentPath === targetUrl;
     }
     return currentPath === targetUrl || currentPath.startsWith(targetUrl + "/");
@@ -101,7 +114,11 @@ const BaseLayout = ({ children }: any) => {
       }`}
     >
       {/* SIDEBAR */}
-      <div className="fixed z-50 p-4 h-screen w-80">
+      <div
+        className={`fixed z-50 p-4 h-screen ${
+          isSidebarCollapsed ? "w-28" : "w-80"
+        } transition-all duration-300`}
+      >
         <div
           className={`h-full ${
             darkMode ? "bg-gray-800" : "bg-white/80"
@@ -109,30 +126,50 @@ const BaseLayout = ({ children }: any) => {
             darkMode ? "border-gray-700" : "border-white/50"
           } rounded-xl px-4 py-6 flex flex-col`}
         >
-          <div className="text-lg font-bold text-center border-b pb-4 flex justify-center">
-            <img
-              src={
-                darkMode
-                  ? "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%202.png?updatedAt=1752058193676"
-                  : "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%201.png?updatedAt=1752058193679"
-              }
-              className="w-40"
-            />
+          {/* Logo + Toggle */}
+          <div className="flex justify-between items-center mb-6">
+            {!isSidebarCollapsed ? (
+              <img
+                src={
+                  darkMode
+                    ? "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%202.png?updatedAt=1752058193676"
+                    : "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%201.png?updatedAt=1752058193679"
+                }
+                className="w-36"
+              />
+            ) : (
+              <img
+                src="https://ik.imagekit.io/tgrsnbr/Favicon.png?updatedAt=1752058193563"
+                className="w-6"
+              />
+            )}
+            <button
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className="text-gray-500 dark:text-gray-300"
+            >
+              <FontAwesomeIcon
+                icon={isSidebarCollapsed ? faBars : faChevronLeft}
+              />
+            </button>
           </div>
 
-          <div className="mt-6 flex-1 space-y-4 overflow-y-auto">
+          <div className="mt-2 flex-1 space-y-4 overflow-y-auto">
             {sidebarSections.map((section) => (
               <div key={section.title}>
-                <div className="text-xs uppercase font-bold text-gray-400 dark:text-gray-500 px-2 mb-3">
-                  {section.title}
-                </div>
+                {!isSidebarCollapsed && (
+                  <div className="text-xs uppercase font-bold text-gray-400 dark:text-gray-500 px-2 mb-3">
+                    {section.title}
+                  </div>
+                )}
                 {section.items.map((item) => {
                   const isActive = isActivePath(item.url);
                   return (
                     <div
                       key={item.url}
                       onClick={() => navigate(item.url)}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center ${
+                        isSidebarCollapsed ? "justify-center" : "gap-3 px-3"
+                      } py-3 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 ${
                         isActive
                           ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow"
                           : darkMode
@@ -141,7 +178,7 @@ const BaseLayout = ({ children }: any) => {
                       }`}
                     >
                       <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
-                      <span>{item.name}</span>
+                      {!isSidebarCollapsed && <span>{item.name}</span>}
                     </div>
                   );
                 })}
@@ -152,7 +189,13 @@ const BaseLayout = ({ children }: any) => {
       </div>
 
       {/* NAVBAR */}
-      <div className="fixed top-0 right-0 ml-64 w-[calc(100%-20rem)] p-4 z-40">
+      <div
+        className={`fixed top-0 right-0 ${
+          isSidebarCollapsed
+            ? "ml-28 w-[calc(100%-7rem)]"
+            : "ml-80 w-[calc(100%-20rem)]"
+        } p-4 z-40 transition-all duration-300`}
+      >
         <div
           className={`h-18 px-4 py-3 flex items-center justify-between backdrop-blur-lg rounded-xl transition-all duration-300 ${
             scrolled
@@ -176,11 +219,9 @@ const BaseLayout = ({ children }: any) => {
                 <FontAwesomeIcon icon={faUserCircle} color="gray" size="xl" />
               }
             >
-              <div className={`py-2 px-4 text-sm rounded-md`}>
-                {user?.email}
-              </div>
+              <div className="py-2 px-4 text-sm rounded-md">{user?.email}</div>
               <div
-                onClick={() => logOut()}
+                onClick={logOut}
                 className={`py-2 px-4 text-sm rounded-md cursor-pointer flex gap-3 items-center ${
                   darkMode
                     ? "hover:bg-gray-200"
@@ -215,8 +256,12 @@ const BaseLayout = ({ children }: any) => {
       </div>
 
       {/* CONTENT */}
-      <div className="ml-80 p-4 pt-28 transition-all duration-300">
-        <div className={`max-w-7xl mx-auto`}>{children}</div>
+      <div
+        className={`transition-all duration-300 ${
+          isSidebarCollapsed ? "ml-28" : "ml-80"
+        } p-4 pt-28`}
+      >
+        <div className="max-w-7xl mx-auto">{children}</div>
       </div>
     </div>
   );
