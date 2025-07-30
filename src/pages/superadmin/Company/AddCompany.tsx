@@ -90,7 +90,7 @@ const AddCompany = () => {
     // Jika valid, lanjutkan simpan
     dispatch(setLoading(true));
     axios
-      .post(`admin/company`, dataCompany)
+      .post(`admin-dashboard/company`, dataCompany)
       .finally(() => {
         dispatch(setLoading(false));
       })

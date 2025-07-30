@@ -1,5 +1,4 @@
-import BaseLayout from "../company/BaseLayoutCompany";
-import LineChart from "../../components/BarChart";
+import BaseLayout from "../user/BaseLayoutCompany";
 
 const CompanyDashboard = () => {
   return (
@@ -7,7 +6,6 @@ const CompanyDashboard = () => {
       <div className="p-4">
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
         <p>Welcome to the dashboard!</p>
-        <LineChart />
         {/* Add more dashboard content here */}
       </div>
     </BaseLayout>

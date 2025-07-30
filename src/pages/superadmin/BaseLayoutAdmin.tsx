@@ -28,13 +28,12 @@ const BaseLayout = ({ children }: any) => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-  const activeUrl = currentPath;
 
   const logOut = () => {
     axios
-      .post(`admin/auth/logout`, null)
+      .post(`admin-dashboard/logout`, null)
       .finally(() => {})
-      .then((res) => {
+      .then(() => {
         removeData("sessionId");
         removeData("userInfo");
         toast.success("Berhasil logout, silahkan login kembali");
@@ -58,22 +57,49 @@ const BaseLayout = ({ children }: any) => {
     }
   }, [darkMode]);
 
-  const sidebarMenu = [
-    { name: "Dashboard", icon: faHome, url: `/admin-dashboard` },
-    { name: "Company", icon: faBuilding, url: `/admin-dashboard/company` },
-    { name: "Payment", icon: faDollar, url: `/admin-dashboard/payment` },
-    { name: "Invoice", icon: faMoneyBill, url: `/admin-dashboard/invoice` },
-    { name: "Admin", icon: faUsers, url: `/admin-dashboard/admin` },
+  const sidebarSections = [
+    {
+      title: "Main",
+      items: [{ name: "Dashboard", icon: faHome, url: `/admin-dashboard` }],
+    },
+    {
+      title: "Data",
+      items: [
+        { name: "Company", icon: faBuilding, url: `/admin-dashboard/company` },
+        {
+          name: "Company User",
+          icon: faUsers,
+          url: `/admin-dashboard/company-user`,
+        },
+        { name: "Admin", icon: faUsers, url: `/admin-dashboard/admin` },
+        { name: "Payment", icon: faDollar, url: `/admin-dashboard/payment` },
+      ],
+    },
+    {
+      title: "Config",
+      items: [
+        {
+          name: "Payment Config",
+          icon: faDollar,
+          url: `/admin-dashboard/payment-config`,
+        },
+      ],
+    },
   ];
 
+  const isActivePath = (targetUrl: string) => {
+    if (targetUrl === "/admin-dashboard") {
+      // hanya cocok jika exact match
+      return currentPath === targetUrl;
+    }
+    return currentPath === targetUrl || currentPath.startsWith(targetUrl + "/");
+  };
+
   const pageInfo = useMemo(() => {
-    return (
-      sidebarMenu.find((item) => item.url === currentPath) || {
-        name: "Unknown",
-        icon: faHome,
-      }
-    );
-  }, [currentPath, sidebarMenu]);
+    const allItems = sidebarSections.flatMap((section) => section.items);
+    const match = allItems.find((item) => isActivePath(item.url));
+    return match || { name: "Unknown", icon: faHome };
+  }, [currentPath]);
 
   return (
     <div
@@ -100,21 +126,32 @@ const BaseLayout = ({ children }: any) => {
               className="w-40"
             />
           </div>
-          <div className="mt-6 flex-1 space-y-1">
-            {sidebarMenu.map((item) => (
-              <div
-                key={item.url}
-                onClick={() => navigate(item.url)}
-                className={`flex items-center gap-3 px-3 py-4 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 ${
-                  activeUrl === item.url
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow"
-                    : darkMode
-                    ? "text-gray-300 hover:bg-gray-700"
-                    : "text-gray-600 hover:bg-gray-200"
-                }`}
-              >
-                <FontAwesomeIcon icon={item.icon} className="w-5 h-8" />
-                <span>{item.name}</span>
+
+          <div className="mt-6 flex-1 space-y-4 overflow-y-auto">
+            {sidebarSections.map((section) => (
+              <div key={section.title}>
+                <div className="text-xs uppercase font-bold text-gray-400 dark:text-gray-500 px-2 mb-3">
+                  {section.title}
+                </div>
+                {section.items.map((item) => {
+                  const isActive = isActivePath(item.url);
+                  return (
+                    <div
+                      key={item.url}
+                      onClick={() => navigate(item.url)}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-lg cursor-pointer text-sm font-medium transition-all duration-200 ${
+                        isActive
+                          ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow"
+                          : darkMode
+                          ? "text-gray-300 hover:bg-gray-700"
+                          : "text-gray-600 hover:bg-gray-200"
+                      }`}
+                    >
+                      <FontAwesomeIcon icon={item.icon} className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>

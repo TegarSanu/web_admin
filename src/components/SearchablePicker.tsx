@@ -3,13 +3,13 @@ import axios from "axios";
 import { debounce } from "lodash";
 
 interface SearchablePickerFieldProps {
-  onChange: (value: string) => void; // return id saja
+  onChange: (value: string | null) => void; // bisa null jika dihapus
   title: string;
   placeHolder?: string;
   id?: string;
   className?: string;
   disabled?: boolean;
-  endpoint: string; // URL endpoint yang di-hit saat search
+  endpoint: string;
 }
 
 interface CompanyResponse {
@@ -40,24 +40,25 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
     isFocused || searchQuery.length > 0 || selectedLabel.length > 0;
 
   const baseClass =
-    "w-full border rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors border-gray-300";
+    "w-full border rounded-md py-3 px-3 pr-10 bg-transparent focus:outline-none transition-colors border-gray-300";
 
-  // Debounced fetch
   const fetchOptions = debounce(async (query: string) => {
     if (!query) {
       setOptions([]);
       return;
     }
-    axios
-      .get(`${endpoint}`, { params: { name: query, page: 1 } })
-      .finally(() => {})
-      .then((res) => {
-        if (searchQuery.length > 0 || selectedLabel.length > 0) {
-          setOptions(res.data.data);
-        } else {
-          setOptions([]);
-        }
+    try {
+      const res = await axios.get(endpoint, {
+        params: { name: query, page: 1 },
       });
+      if (searchQuery.length > 0 || selectedLabel.length > 0) {
+        setOptions(res.data.data);
+      } else {
+        setOptions([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch options:", error);
+    }
   }, 500);
 
   useEffect(() => {
@@ -70,6 +71,13 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
     setOptions([]);
     setShowDropdown(false);
     onChange(item.id);
+  };
+
+  const handleClear = () => {
+    setSelectedLabel("");
+    setSearchQuery("");
+    onChange(null);
+    setOptions([]);
   };
 
   return (
@@ -108,6 +116,17 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
       >
         {placeHolder || title}
       </label>
+
+      {/* Clear Button */}
+      {selectedLabel && !disabled && (
+        <button
+          type="button"
+          onClick={handleClear}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+        >
+          &#x2715;
+        </button>
+      )}
 
       {showDropdown && options.length > 0 && (
         <div className="absolute z-50 bg-white border rounded shadow-md mt-1 w-full max-h-60 overflow-y-auto">

@@ -1,10 +1,6 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setLoading } from "../../../redux/features/loading/loadingSlice";
+import { useSelector } from "react-redux";
 import type { RootState } from "../../../redux/app/store";
-import axios from "axios";
 import TextField from "../../../components/TextField";
-import DropdownField from "../../../components/DropdownField";
 import { utcDateTime } from "../../../api/config";
 
 const PaymentDetail = ({ data, onBack }: any) => {
@@ -30,27 +26,13 @@ const PaymentDetail = ({ data, onBack }: any) => {
 
         {/* Form Fields */}
         <div className="w-full p-4">
-          <div className="w-full grid grid-cols-3 gap-4">
-            <TextField
-              value={data.companyName}
-              onChange={(e: any) => {}}
-              title="Nama Company"
-              disabled
-            />
-            <TextField
-              value={data.companyInitial}
-              onChange={(e: any) => {}}
-              title="Initial"
-              disabled
-            />
+          <div className="w-full grid grid-cols-2 gap-4">
             <TextField
               value={data.paymentMethod}
               onChange={(e: any) => {}}
               title="Metode Pembayaran"
               disabled
             />
-          </div>
-          <div className="w-full grid grid-cols-4 gap-4 mt-4">
             <TextField
               value={data.amount}
               onChange={(e: any) => {}}
@@ -58,6 +40,8 @@ const PaymentDetail = ({ data, onBack }: any) => {
               numberOnly
               disabled
             />
+          </div>
+          <div className="w-full grid grid-cols-3 gap-4 mt-4">
             <TextField
               value={data.amountChargeAggregator}
               onChange={(e: any) => {}}
@@ -80,7 +64,7 @@ const PaymentDetail = ({ data, onBack }: any) => {
               disabled
             />
           </div>
-          <div className="w-full grid grid-cols-2 gap-4 mt-4">
+          <div className="w-full grid grid-cols-4 gap-4 mt-4">
             <TextField
               value={data.transactionId}
               onChange={(e: any) => {}}
@@ -92,15 +76,6 @@ const PaymentDetail = ({ data, onBack }: any) => {
               value={data.transactionType}
               onChange={(e: any) => {}}
               title="Tipe Transaksi"
-              numberOnly
-              disabled
-            />
-          </div>
-          <div className="w-full grid grid-cols-3 gap-4 mt-4">
-            <TextField
-              value={data.profit}
-              onChange={(e: any) => {}}
-              title="Profit"
               numberOnly
               disabled
             />

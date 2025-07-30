@@ -9,10 +9,13 @@ import {
   faAngleLeft,
   faAngleRight,
   faPencil,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import EditAdmin from "./EditAdmin";
 import TextField from "../../../components/TextField";
+import ConfirmModal from "../../../components/ConfirmModal";
+import { toast } from "react-toastify";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -21,6 +24,7 @@ const Admin = () => {
   const [listAdmin, setListAdmin] = useState<any[]>([]);
   const [editedAdmin, setEditedAdmin] = useState<any>(null);
   const nameRef: any = useRef(null);
+  const [detail, setDetail] = useState<any>(null);
   const [paging, setPaging] = useState({
     page: 1,
     size: 10,
@@ -38,11 +42,23 @@ const Admin = () => {
   const getAdmin = () => {
     dispatch(setLoading(true));
     axios
-      .get("admin/admin", { params: filter })
+      .get("admin-dashboard/admin", { params: filter })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
         setPaging(res.data.paging);
         setListAdmin(res.data.data);
+      });
+  };
+
+  const deleteAdmin = () => {
+    dispatch(setLoading(true));
+    axios
+      .post("admin-dashboard/admin/_delete", { id: detail?.id })
+      .finally(() => dispatch(setLoading(false)))
+      .then((res) => {
+        getAdmin();
+        setDetail(null);
+        toast.success(`Berhasil menghapus`);
       });
   };
 
@@ -105,6 +121,13 @@ const Admin = () => {
 
   return (
     <BaseLayout>
+      <ConfirmModal
+        open={detail}
+        title="Hapus Data Admin"
+        desc={`Apakah anda yakin ingin menghapus data ${detail?.name}?`}
+        onClose={() => setDetail(null)}
+        onConfirm={() => deleteAdmin()}
+      />
       {editedAdmin ? (
         <EditAdmin
           data={editedAdmin}
@@ -185,12 +208,12 @@ const Admin = () => {
                         >
                           <FontAwesomeIcon icon={faPencil} />
                         </button>
-                        {/* <button
-                          onClick={() => {}}
+                        <button
+                          onClick={() => setDetail(admin)}
                           className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600 transition"
                         >
                           <FontAwesomeIcon icon={faTrash} />
-                        </button> */}
+                        </button>
                       </td>
                     </tr>
                   ))}

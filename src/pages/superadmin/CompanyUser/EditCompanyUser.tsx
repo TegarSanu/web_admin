@@ -7,15 +7,17 @@ import TextField from "../../../components/TextField";
 import DropdownField from "../../../components/DropdownField";
 import { toast } from "react-toastify";
 
-const EditAdmin = ({ data, onBack }: any) => {
+const EditCompanyUser = ({ data, onBack }: any) => {
   const dispatch = useDispatch();
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [password, setPassword] = useState({
+    companyId: data.companyId,
     id: data.id,
     newPassword: "",
   });
-  const [dataAdmin, setDataAdmin] = useState<any>({
+  const [dataAdmin, setDataAdmin] = useState({
     id: data.id,
+    companyId: data.companyId,
     name: data.name,
     note: data.note,
   });
@@ -24,19 +26,19 @@ const EditAdmin = ({ data, onBack }: any) => {
     if (password.newPassword) {
       dispatch(setLoading(true));
       axios
-        .post(`admin-dashboard/admin/password/_update`, password)
+        .post(`admin-dashboard/company-user/password/_update`, password)
         .finally(() => {
           dispatch(setLoading(false));
         })
         .then((res) => {
-          saveAdmin();
+          saveCompanyUser();
         });
     } else {
-      saveAdmin();
+      saveCompanyUser();
     }
   };
 
-  const saveAdmin = () => {
+  const saveCompanyUser = () => {
     if (!dataAdmin.name) {
       toast.error("Nama admin tidak boleh kosong");
       return;
@@ -47,7 +49,7 @@ const EditAdmin = ({ data, onBack }: any) => {
     }
     dispatch(setLoading(true));
     axios
-      .post(`admin-dashboard/admin/_update`, dataAdmin)
+      .post(`admin-dashboard/company-user/_update`, dataAdmin)
       .finally(() => {
         dispatch(setLoading(false));
       })
@@ -73,7 +75,7 @@ const EditAdmin = ({ data, onBack }: any) => {
     >
       <div>
         <div className="w-full p-4 border-b border-gray-200 flex items-center justify-between">
-          <p className="text-xl font-semibold">Edit Data Company</p>
+          <p className="text-xl font-semibold">Edit Data Company User</p>
           <button
             onClick={onBack}
             className="inline-flex items-center px-3 py-1 text-sm font-semibold text-gray-500 hover:text-white rounded-lg border hover:bg-gray-500 focus:outline-none transition"
@@ -81,37 +83,23 @@ const EditAdmin = ({ data, onBack }: any) => {
             Kembali
           </button>
         </div>
-
-        {/* Form Fields */}
-        <div className="w-full p-4">
-          <div className="w-full grid grid-cols-3 gap-4">
-            <TextField
-              value={dataAdmin.name}
-              onChange={(e: any) => handleChangeValue("name", e)}
-              title="Nama Admin"
-            />
-            <TextField
-              value={password.newPassword}
-              onChange={(e: any) => handleChangePassword("newPassword", e)}
-              title="Kata Sandi Baru"
-            />
-            <DropdownField
-              title="Deleted ?"
-              placeHolder="Deleted ?"
-              value={dataAdmin.deleted}
-              onChange={(e: any) => handleChangeValue("deleted", e)}
-              options={[
-                { label: "Iya", value: true as any },
-                { label: "Tidak", value: false as any },
-              ]}
-            />
-          </div>
+        <div className="w-full p-4 grid grid-cols-2 gap-4">
+          <TextField
+            value={dataAdmin.name}
+            onChange={(e: any) => handleChangeValue("name", e)}
+            title="Nama Admin"
+          />
+          <TextField
+            value={password.newPassword}
+            onChange={(e: any) => handleChangePassword("newPassword", e)}
+            title="Kata Sandi Baru"
+          />
           <TextField
             value={dataAdmin.note}
             onChange={(e: any) => handleChangeValue("note", e)}
             title="Catatan"
             multiline
-            className="mt-4"
+            className="col-span-2"
           />
         </div>
         <div className="w-full p-4 border-t border-gray-200 flex items-center justify-center">
@@ -127,4 +115,4 @@ const EditAdmin = ({ data, onBack }: any) => {
   );
 };
 
-export default EditAdmin;
+export default EditCompanyUser;

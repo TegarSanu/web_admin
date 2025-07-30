@@ -1,7 +1,7 @@
 // src/AdminGuard.jsx
 import { Navigate, useParams } from "react-router-dom";
 import AdminDashboard from "../pages/superadmin/Dashboard";
-import CompanyDashboard from "../pages/company/Dashboard";
+import CompanyDashboard from "../pages/user/Dashboard";
 
 const AdminGuard = () => {
   const sessionId = JSON.parse(localStorage.getItem("sessionId") || "null");

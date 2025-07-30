@@ -69,9 +69,9 @@ const EditCompany = ({ data, onBack }: any) => {
       }
     }
     dispatch(setLoading(true));
-    const { charges, apiToken, id, ...rest } = dataCompany;
+    const { charges, apiToken, ...rest } = dataCompany;
     axios
-      .put(`admin/company/${data.id}`, {
+      .post(`admin-dashboard/company/_update`, {
         ...rest,
         chargeList: dataCompany?.charges,
       })

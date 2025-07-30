@@ -6,11 +6,13 @@ import React, { useRef, useState, useEffect } from "react";
 interface PdfUploaderProps {
   onChange: (urls: string[]) => void;
   initialUrls?: string[];
+  showOnly?: boolean;
 }
 
 const PdfUploader: React.FC<PdfUploaderProps> = ({
   onChange,
   initialUrls = [],
+  showOnly = false,
 }) => {
   const [fileUrls, setFileUrls] = useState<string[]>(initialUrls);
   const [isUploading, setIsUploading] = useState(false);
@@ -59,7 +61,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({
 
   return (
     <div className="flex flex-col items-center w-full">
-      {fileUrls.length > 0 && (
+      {fileUrls.length > 0 ? (
         <div className="flex flex-col w-full mb-2 space-y-1">
           {fileUrls.map((url, index) => (
             <div
@@ -77,35 +79,46 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({
                   PDF {index + 1}
                 </a>
               </div>
-              <button
-                onClick={() => handleRemove(index)}
-                className="text-red-500 hover:text-red-700 ml-2 text-sm"
-              >
-                Hapus
-              </button>
+              {!showOnly && (
+                <button
+                  onClick={() => handleRemove(index)}
+                  className="text-red-500 hover:text-red-700 ml-2 text-sm"
+                >
+                  Hapus
+                </button>
+              )}
             </div>
           ))}
         </div>
+      ) : (
+        // ✅ Tampilkan teks jika kosong
+        <p className="text-sm text-gray-500 mb-2 italic">Tidak ada dokumen.</p>
       )}
 
-      <button
-        onClick={handleButtonClick}
-        disabled={isUploading}
-        className={`px-4 py-2 rounded-lg bg-green-500 text-white ${
-          isUploading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-        }`}
-      >
-        {isUploading ? "Mengupload..." : "Upload PDF"}
-      </button>
+      {!showOnly && (
+        <>
+          <button
+            onClick={handleButtonClick}
+            disabled={isUploading}
+            className={`px-4 py-2 rounded-lg bg-green-500 text-white ${
+              isUploading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-green-600"
+            }`}
+          >
+            {isUploading ? "Mengupload..." : "Upload PDF"}
+          </button>
 
-      <input
-        type="file"
-        accept="application/pdf"
-        ref={fileInputRef}
-        className="hidden"
-        onChange={handleFileChange}
-        multiple
-      />
+          <input
+            type="file"
+            accept="application/pdf"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
+            multiple
+          />
+        </>
+      )}
     </div>
   );
 };

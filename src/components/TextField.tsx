@@ -5,11 +5,11 @@ interface TextFieldProps {
   title: string;
   placeHolder?: string;
   multiline?: boolean;
-  value?: string;
+  value?: string | number;
   id?: string;
   className?: string;
   numberOnly?: boolean;
-  disabled?: boolean; // Tambahkan prop disabled
+  disabled?: boolean;
 }
 
 const TextField: React.FC<TextFieldProps> = ({
@@ -21,58 +21,63 @@ const TextField: React.FC<TextFieldProps> = ({
   id,
   className = "",
   numberOnly = false,
-  disabled = false, // Default false
+  disabled = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [defaultValue, setDefaultValue] = useState<string>("");
+
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  const isActive = isFocused || (value ?? "").length > 0;
+  const hasExternalValue = value !== undefined && value !== null;
+  const currentValue = hasExternalValue ? String(value) : defaultValue;
+  const isActive = isFocused || currentValue.length > 0;
 
   useEffect(() => {
-    if (String(value).length > 0) setIsFocused(true);
-  }, [String(value)]);
+    if (hasExternalValue) {
+      setIsFocused(true);
+    }
+  }, [value]);
 
-  const baseClass = `w-full border rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors border-gray-300`;
+  const baseClass =
+    "w-full border rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors border-gray-300";
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    let inputValue = e.target.value;
+    const inputValue = e.target.value;
     if (numberOnly) {
-      // Hanya izinkan angka dan kosong
       if (/^\d*$/.test(inputValue)) {
         onChange(inputValue);
+        setDefaultValue(inputValue);
       }
     } else {
       onChange(inputValue);
+      setDefaultValue(inputValue);
     }
+  };
+
+  const commonProps = {
+    ref: inputRef,
+    id,
+    onChange: handleChange,
+    onFocus: () => !disabled && setIsFocused(true),
+    onBlur: () => (numberOnly ? setIsFocused(true) : setIsFocused(false)),
+    className: baseClass,
+    value: currentValue,
+    disabled,
   };
 
   return (
     <div className={`relative ${className}`}>
       {multiline ? (
         <textarea
-          ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-          id={id}
-          onChange={handleChange}
-          onFocus={() => !disabled && setIsFocused(true)}
-          onBlur={() => (numberOnly ? setIsFocused(true) : setIsFocused(false))}
-          className={baseClass}
-          value={value}
+          {...(commonProps as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
           rows={4}
-          disabled={disabled} // Set disabled textarea
         />
       ) : (
         <input
-          ref={inputRef as React.RefObject<HTMLInputElement>}
-          id={id}
+          {...(commonProps as React.InputHTMLAttributes<HTMLInputElement>)}
           type="text"
-          onChange={handleChange}
-          onFocus={() => !disabled && setIsFocused(true)}
-          onBlur={() => (numberOnly ? setIsFocused(true) : setIsFocused(false))}
-          className={baseClass}
-          value={value}
-          disabled={disabled} // Set disabled input
         />
       )}
       <label

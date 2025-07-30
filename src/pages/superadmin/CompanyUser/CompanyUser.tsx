@@ -10,18 +10,22 @@ import {
   faAngleRight,
   faArrowCircleUp,
   faPencil,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import EditCompany from "./EditCompany";
+import EditCompanyUser from "./EditCompanyUser";
 import { useNavigate } from "react-router-dom";
 import TextField from "../../../components/TextField";
+import SearchablePickerField from "../../../components/SearchablePicker";
+import ConfirmModal from "../../../components/ConfirmModal";
 import { toast } from "react-toastify";
 
-const Company = () => {
+const CompanyUser = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [companies, setCompanies] = useState<any[]>([]);
-  const [editedCompany, setEditedCompany] = useState<any>(null);
+  const [editedUser, setEditedUser] = useState<any>(null);
+  const [detail, setDetail] = useState<any>(null);
   const nameRef: any = useRef(null);
   const [paging, setPaging] = useState({
     page: 1,
@@ -30,18 +34,18 @@ const Company = () => {
     totalPages: 1,
   });
   const [filter, setFilter] = useState({
+    companyId: null,
+    email: "",
     name: "",
-    initial: "",
-    id: "",
     page: 1,
     size: 10,
     sortBy: "-createdDate",
   });
 
-  const getCompany = () => {
+  const getCompanyUser = () => {
     dispatch(setLoading(true));
     axios
-      .get("admin-dashboard/company", { params: filter })
+      .get("admin-dashboard/company-user", { params: filter })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
         setPaging(res.data.paging);
@@ -49,18 +53,23 @@ const Company = () => {
       });
   };
 
-  const updateToken = (id: string) => {
+  const deleteCompanyUser = () => {
     dispatch(setLoading(true));
     axios
-      .post("admin-dashboard/company/token/_update", { id: id })
+      .post("admin-dashboard/company-user/_delete", {
+        id: detail?.id,
+        companyId: detail?.companyId,
+      })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
-        toast.success("Berhasil update token");
+        getCompanyUser();
+        setDetail(null);
+        toast.success(`Berhasil menghapus data`);
       });
   };
 
   useEffect(() => {
-    getCompany();
+    getCompanyUser();
   }, [filter]);
 
   const handleFilterChange = (key: any, value: any) => {
@@ -118,12 +127,19 @@ const Company = () => {
 
   return (
     <BaseLayout>
-      {editedCompany ? (
-        <EditCompany
-          data={editedCompany}
+      <ConfirmModal
+        open={detail}
+        title="Hapus Data Company User"
+        desc={`Apakah anda yakin ingin menghapus data ${detail?.name}?`}
+        onClose={() => setDetail(null)}
+        onConfirm={() => deleteCompanyUser()}
+      />
+      {editedUser ? (
+        <EditCompanyUser
+          data={editedUser}
           onBack={() => {
-            setEditedCompany(null);
-            getCompany();
+            setEditedUser(null);
+            getCompanyUser();
           }}
         />
       ) : (
@@ -135,18 +151,23 @@ const Company = () => {
           <div className="">
             <div className="w-full p-4 border-b border-gray-200 flex items-center justify-between">
               <div>
-                <p className="text-xl font-semibold">Data Company</p>
+                <p className="text-xl font-semibold">Data Company User</p>
               </div>
             </div>
             <div className="w-full p-4">
               <div className="grid grid-cols-3 gap-4">
+                <SearchablePickerField
+                  title="Cari Company"
+                  endpoint="admin-dashboard/company"
+                  onChange={(id) => handleFilterChange("companyId", id)}
+                />
                 <TextField
-                  title="Nama Company"
+                  title="Nama"
                   onChange={(e: any) => handleFilterChange("name", e)}
                 />
                 <TextField
-                  title="Inital"
-                  onChange={(e: any) => handleFilterChange("initial", e)}
+                  title="Email"
+                  onChange={(e: any) => handleFilterChange("email", e)}
                 />
               </div>
             </div>
@@ -169,10 +190,7 @@ const Company = () => {
                 <thead className="border-b border-t bg-gray-50 border-gray-200">
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                      Nama Company
-                    </th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                      Alamat
+                      Nama
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                       Email
@@ -183,35 +201,24 @@ const Company = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {companies.map((company) => (
-                    <tr
-                      key={company.id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      <td className="px-6 py-4 flex items-center gap-3">
-                        <img
-                          src={company.imageUrl}
-                          alt={company.name}
-                          className="w-10 h-10 rounded-full object-cover"
-                        />
-                        {company.name}
-                      </td>
-                      <td className="px-6 py-4">{company.address}</td>
-                      <td className="px-6 py-4">{company.email}</td>
+                  {companies.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 ">{user.name}</td>
+                      <td className="px-6 py-4">{user.email}</td>
                       <td className="px-6 py-4 text-right space-x-2">
                         <button
-                          title={`Edit data ${company.name}`}
-                          onClick={() => setEditedCompany(company)}
+                          title={`Edit data ${user.name}`}
+                          onClick={() => setEditedUser(user)}
                           className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition"
                         >
                           <FontAwesomeIcon icon={faPencil} />
                         </button>
                         <button
-                          title={`Update token ${company.name}`}
-                          onClick={() => updateToken(company.id)}
-                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded hover:bg-yellow-600 transition"
+                          title={`Hapus data ${user.name}`}
+                          onClick={() => setDetail(user)}
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-red-500 rounded hover:bg-red-600 transition"
                         >
-                          <FontAwesomeIcon icon={faArrowCircleUp} />
+                          <FontAwesomeIcon icon={faTrash} />
                         </button>
                       </td>
                     </tr>
@@ -282,4 +289,4 @@ const Company = () => {
   );
 };
 
-export default Company;
+export default CompanyUser;

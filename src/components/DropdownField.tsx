@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from "react";
 
 interface Option {
   label: string;
-  value: string;
+  value: string | number | boolean;
 }
 
 interface DropdownFieldProps {
-  onChange: (value: string) => void;
+  onChange: (value: string | number | boolean) => void;
   title: string;
   placeHolder?: string;
-  value: string;
+  value: string | number | boolean;
   options: Option[];
   id?: string;
   className?: string;
@@ -27,26 +27,27 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
   const [isFocused, setIsFocused] = useState(true);
   const selectRef = useRef<HTMLSelectElement>(null);
 
-  // Jika value cocok dengan salah satu option, langsung terisi
-  useEffect(() => {
-    const found = options.find((opt) => opt.value === value);
-    if (found && selectRef.current) {
-      selectRef.current.value = found.value;
-    }
-  }, [value, options]);
-
-  const isActive = isFocused || value.length > 0;
+  const stringifiedValue = String(value);
+  const isActive = isFocused || stringifiedValue.length > 0;
 
   const baseClass =
     "w-full border border-gray-300 rounded-md py-3 px-3 bg-transparent focus:outline-none transition-colors appearance-none";
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedString = e.target.value;
+    const matchedOption = options.find(
+      (opt) => String(opt.value) === selectedString
+    );
+    onChange(matchedOption?.value ?? selectedString);
+  };
 
   return (
     <div className={`relative ${className}`}>
       <select
         ref={selectRef}
         id={id}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={stringifiedValue}
+        onChange={handleChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(true)}
         className={baseClass}
@@ -55,7 +56,7 @@ const DropdownField: React.FC<DropdownFieldProps> = ({
           {placeHolder || title}
         </option>
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={String(opt.value)} value={String(opt.value)}>
             {opt.label}
           </option>
         ))}

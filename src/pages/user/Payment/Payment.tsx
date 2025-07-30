@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading } from "../../../redux/features/loading/loadingSlice";
-import BaseLayout from "../BaseLayoutAdmin";
 import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,11 +11,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { formatRupiah, utcDateTime } from "../../../api/config";
 import BarChart from "../../../components/BarChart";
-import PaymentDetail from "./PaymentDetail";
 import moment from "moment";
 import TextField from "../../../components/TextField";
 import DatePickerField from "../../../components/DateTimePicker";
 import SearchablePickerField from "../../../components/SearchablePicker";
+import BaseLayout from "../BaseLayoutCompany";
+import PaymentDetail from "./PaymentDetail";
 
 const Payment = () => {
   const dispatch = useDispatch();
@@ -32,7 +32,6 @@ const Payment = () => {
     totalPages: 1,
   });
   const [filter, setFilter] = useState({
-    companyId: null,
     type: null,
     startDate: null,
     endDate: null,
@@ -41,7 +40,6 @@ const Payment = () => {
     sortBy: "-createdDate",
   });
   const [filterAnalytic, setFilterAnalytic] = useState({
-    companyId: null,
     startDate: null,
     endDate: null,
   });
@@ -49,7 +47,7 @@ const Payment = () => {
   const getPayment = () => {
     dispatch(setLoading(true));
     axios
-      .get("admin-dashboard/payment", { params: filter })
+      .get("company-dashboard/payment", { params: filter })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
         setPaging(res.data.paging);
@@ -60,7 +58,7 @@ const Payment = () => {
   const paymentAnalytic = () => {
     dispatch(setLoading(true));
     axios
-      .get(`admin-dashboard/payment/payment-by-date`, {
+      .get(`company-dashboard/payment/payment-by-date`, {
         params: filterAnalytic,
       })
       .finally(() => dispatch(setLoading(false)))
@@ -90,11 +88,11 @@ const Payment = () => {
 
   useEffect(() => {
     getPayment();
-  }, [filter.endDate, filter.companyId, filter.page, filter.size]);
+  }, [filter.endDate, filter.page, filter.size]);
 
   useEffect(() => {
     paymentAnalytic();
-  }, [filterAnalytic.endDate, filter.companyId]);
+  }, [filterAnalytic.endDate]);
 
   const handleFilterChange = (key: any, value: any) => {
     if (nameRef.current) {
@@ -180,13 +178,6 @@ const Payment = () => {
               </div>
               <div className="w-full p-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <SearchablePickerField
-                    title="Cari Company"
-                    endpoint="admin-dashboard/company"
-                    onChange={(id) =>
-                      handleFilterAnalyticChange("companyId", id)
-                    }
-                  />
                   <DatePickerField
                     title="Start Date"
                     onChange={(val) =>
@@ -245,11 +236,6 @@ const Payment = () => {
               </div>
               <div className="w-full p-4">
                 <div className="grid grid-cols-3 gap-4">
-                  <SearchablePickerField
-                    title="Cari Company"
-                    endpoint="admin-dashboard/company"
-                    onChange={(id) => handleFilterChange("companyId", id)}
-                  />
                   <DatePickerField
                     title="Start Date"
                     onChange={(val) => handleFilterChange("startDate", val)}
@@ -274,7 +260,7 @@ const Payment = () => {
                   <thead className="border-b border-t bg-gray-50 border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
-                        Nama Company
+                        Id Transaksi
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         Metode Pembayaran
@@ -297,7 +283,7 @@ const Payment = () => {
                         className="hover:bg-gray-50 transition"
                       >
                         <td className="px-6 py-4 flex items-center gap-3">
-                          {payment.companyName}
+                          {payment.transactionId}
                         </td>
                         <td className="px-6 py-4">{payment.paymentMethod}</td>
                         <td className="px-6 py-4">

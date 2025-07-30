@@ -15,12 +15,20 @@ const Login = () => {
   const navigate = useNavigate();
   const { role }: any = useParams();
 
+  const url = () => {
+    if (role === "admin-dashboard") {
+      return `admin-dashboard/login`;
+    } else {
+      return `company-dashboard/login`;
+    }
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (username && password) {
       dispatch(setLoading(true));
       axios
-        .post(`admin/auth/login`, { email: username, password: password })
+        .post(`${url()}`, { email: username, password: password })
         .finally(() => {
           dispatch(setLoading(false));
         })
@@ -43,7 +51,13 @@ const Login = () => {
 
       {/* Login Card */}
       <div className="w-full max-w-md bg-white/70 backdrop-blur-xl rounded-2xl shadow-xl border border-white/40 p-8 transition-all duration-300">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+        <img
+          src={
+            "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%201.png?updatedAt=1752058193679"
+          }
+          className="w-[80%] mb-10 mt-5 flex mx-auto"
+        />
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Welcome {role === "company-dashboard" ? "Admin" : "Superadmin"} 👋
         </h2>
 
@@ -86,16 +100,6 @@ const Login = () => {
             Login
           </button>
         </form>
-
-        <p className="text-sm text-center text-gray-600 mt-6">
-          Belum punya akun?{" "}
-          <span
-            className="text-blue-600 cursor-pointer hover:underline"
-            onClick={() => alert("Redirect ke halaman daftar")}
-          >
-            Daftar Sekarang
-          </span>
-        </p>
       </div>
     </div>
   );
