@@ -120,7 +120,7 @@ const AddCompany = () => {
   const handlePdfChange = (urls: string[]) => {
     setDataCompany({
       ...dataCompany,
-      agreementLink: [...dataCompany.agreementLink, urls],
+      agreementLink: [...dataCompany.agreementLink, ...urls],
     });
     console.log("File PDF saat ini:", urls);
   };

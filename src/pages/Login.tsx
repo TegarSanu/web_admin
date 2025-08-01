@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faLock } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
@@ -14,6 +14,34 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { role }: any = useParams();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("sessionId");
+    const companyId = params.get("companyId");
+
+    if (token && companyId && role === "company-dashboard") {
+      dispatch(setLoading(true));
+      axios
+        .post("admin-dashboard/login/company", null, {
+          params: {
+            token,
+            companyId,
+          },
+        })
+        .finally(() => dispatch(setLoading(false)))
+        .then((res) => {
+          setData("session-company", res.data.data.sessionId);
+          setData("user-company", res.data.data);
+          toast.success("Login sukses");
+          navigate(`/${role}`, { replace: true });
+        })
+        .catch(() => {
+          toast.error("Session tidak valid, silakan login ulang");
+        });
+    }
+  }, [location.search, role, dispatch, navigate]);
 
   const url = () => {
     if (role === "admin-dashboard") {
@@ -33,8 +61,13 @@ const Login = () => {
           dispatch(setLoading(false));
         })
         .then((res) => {
-          setData("sessionId", res.data.data.sessionId);
-          setData("userInfo", res.data.data);
+          if (role === "admin-dashboard") {
+            setData("session-superadmin", res.data.data.sessionId);
+            setData("user-superadmin", res.data.data);
+          } else if (role === "company-dashboard") {
+            setData("session-company", res.data.data.sessionId);
+            setData("user-company", res.data.data);
+          }
           toast.success("Login sukses");
           navigate(`/${role}`, { replace: true });
         });

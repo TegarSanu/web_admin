@@ -23,23 +23,6 @@ const Company = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [editedCompany, setEditedCompany] = useState<any>(null);
-  const nameRef: any = useRef(null);
-  const [paging, setPaging] = useState({
-    page: 1,
-    size: 10,
-    totalElements: 0,
-    totalPages: 1,
-  });
-  const [filter, setFilter] = useState({
-    name: "",
-    initial: "",
-    id: "",
-    page: 1,
-    size: 10,
-    sortBy: "-createdDate",
-  });
   const [dataCompany, setDataCompany] = useState<any>({});
 
   const getCompany = () => {
@@ -54,60 +37,7 @@ const Company = () => {
 
   useEffect(() => {
     getCompany();
-  }, [filter]);
-
-  const handleFilterChange = (key: any, value: any) => {
-    if (nameRef.current) {
-      clearTimeout(nameRef.current);
-    }
-    nameRef.current = setTimeout(() => {
-      setFilter((prevFilter) => ({
-        ...prevFilter,
-        [key]: value,
-        page: 1,
-      }));
-    }, 600);
-  };
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= paging.totalPages) {
-      setFilter((prev) => ({
-        ...prev,
-        page,
-      }));
-    }
-  };
-
-  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newSize = parseInt(e.target.value, 10);
-    setFilter((prev) => ({
-      ...prev,
-      size: newSize,
-      page: 1, // Reset ke page 1 agar aman
-    }));
-  };
-
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPage = paging.totalPages;
-    const currentPage = paging.page;
-    for (let i = 1; i <= maxPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded ${
-            i === currentPage
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          } transition`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
-  };
+  }, []);
 
   return (
     <BaseLayout>

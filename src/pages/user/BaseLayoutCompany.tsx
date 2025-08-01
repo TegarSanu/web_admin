@@ -20,21 +20,35 @@ import { toggleDarkMode } from "../../redux/features/darkMode/darkModeSlice";
 import { getData, removeData } from "../../api/config";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { setLoading } from "../../redux/features/loading/loadingSlice";
 
 const BaseLayout = ({ children }: any) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = getData("userInfo");
+  const user = getData("user-company");
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const currentPath = location.pathname;
-
-  // Ambil & simpan state collapse sidebar
+  const [dataCompany, setDataCompany] = useState<any>();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
     const stored = localStorage.getItem("isSidebarCollapsed");
     return stored ? JSON.parse(stored) : false;
   });
+
+  const getCompany = () => {
+    dispatch(setLoading(true));
+    axios
+      .get("company-dashboard/company")
+      .finally(() => dispatch(setLoading(false)))
+      .then((res) => {
+        setDataCompany(res.data.data);
+      });
+  };
+
+  useEffect(() => {
+    getCompany();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(
@@ -48,8 +62,8 @@ const BaseLayout = ({ children }: any) => {
       .post(`company-dashboard/logout`, null)
       .finally(() => {})
       .then(() => {
-        removeData("sessionId");
-        removeData("userInfo");
+        removeData("session-company");
+        removeData("user-company");
         toast.success("Berhasil logout, silahkan login kembali");
         navigate(`/company-dashboard/login`);
       });
@@ -127,7 +141,7 @@ const BaseLayout = ({ children }: any) => {
           } rounded-xl px-4 py-6 flex flex-col`}
         >
           {/* Logo + Toggle */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="mb-6 flex flex-col items-center">
             {!isSidebarCollapsed ? (
               <img
                 src={
@@ -135,22 +149,15 @@ const BaseLayout = ({ children }: any) => {
                     ? "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%202.png?updatedAt=1752058193676"
                     : "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%201.png?updatedAt=1752058193679"
                 }
-                className="w-36"
+                className="h-6"
               />
             ) : (
               <img
                 src="https://ik.imagekit.io/tgrsnbr/Favicon.png?updatedAt=1752058193563"
-                className="w-6"
+                className="h-9"
               />
             )}
-            <button
-              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-              className="text-gray-500 dark:text-gray-300"
-            >
-              <FontAwesomeIcon
-                icon={isSidebarCollapsed ? faBars : faChevronLeft}
-              />
-            </button>
+            <img src={dataCompany?.imageUrl} className="h-9 mt-4" />
           </div>
 
           <div className="mt-2 flex-1 space-y-4 overflow-y-auto">
@@ -205,13 +212,21 @@ const BaseLayout = ({ children }: any) => {
               : "bg-transparent border-transparent"
           }`}
         >
-          <div>
-            <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
-              <FontAwesomeIcon icon={pageInfo.icon} />
-              <span>/</span>
-              <span>{pageInfo.name}</span>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className="text-gray-500 dark:text-gray-300 cursor-pointer w-9 h-9 hover:shadow border hover:bg-gray-50 transition-all dura border-gray-200 rounded-lg"
+            >
+              <FontAwesomeIcon icon={faBars} />
+            </button>
+            <div>
+              <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
+                <FontAwesomeIcon icon={pageInfo.icon} />
+                <span>/</span>
+                <span>{pageInfo.name}</span>
+              </div>
+              <h1 className="font-bold text-xl">{pageInfo.name}</h1>
             </div>
-            <h1 className="font-bold text-xl">{pageInfo.name}</h1>
           </div>
           <div className="flex gap-3 items-center">
             <DropdownButton
@@ -232,7 +247,7 @@ const BaseLayout = ({ children }: any) => {
                 Log Out
               </div>
             </DropdownButton>
-            <label
+            {/* <label
               htmlFor="toggle"
               className="relative inline-block w-10 h-8 cursor-pointer mr-4"
             >
@@ -250,7 +265,7 @@ const BaseLayout = ({ children }: any) => {
                   className="text-gray-700 text-xs"
                 />
               </div>
-            </label>
+            </label> */}
           </div>
         </div>
       </div>

@@ -2,10 +2,13 @@
 import { Navigate, useParams } from "react-router-dom";
 import AdminDashboard from "../pages/superadmin/Dashboard";
 import CompanyDashboard from "../pages/user/Dashboard";
+import { getData } from "../api/config";
 
 const AdminGuard = () => {
-  const sessionId = JSON.parse(localStorage.getItem("sessionId") || "null");
   const { role }: any = useParams();
+  const sessionId = getData(
+    role === "admin-dashboard" ? "session-superadmin" : "session-company"
+  );
 
   if (!sessionId) {
     if (role === "admin-dashboard") {

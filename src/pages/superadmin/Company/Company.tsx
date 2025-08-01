@@ -10,13 +10,16 @@ import {
   faAngleRight,
   faArrowCircleUp,
   faPencil,
+  faSignIn,
 } from "@fortawesome/free-solid-svg-icons";
 import EditCompany from "./EditCompany";
 import { useNavigate } from "react-router-dom";
 import TextField from "../../../components/TextField";
 import { toast } from "react-toastify";
+import { getData } from "../../../api/config";
 
 const Company = () => {
+  const sessionId = getData("session-superadmin");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
@@ -199,6 +202,17 @@ const Company = () => {
                       <td className="px-6 py-4">{company.address}</td>
                       <td className="px-6 py-4">{company.email}</td>
                       <td className="px-6 py-4 text-right space-x-2">
+                        <button
+                          title={`Login admin company ${company.name}`}
+                          onClick={() =>
+                            window.open(
+                              `/company-dashboard/login?sessionId=${sessionId}&companyId=${company.id}`
+                            )
+                          }
+                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 transition"
+                        >
+                          <FontAwesomeIcon icon={faSignIn} />
+                        </button>
                         <button
                           title={`Edit data ${company.name}`}
                           onClick={() => setEditedCompany(company)}

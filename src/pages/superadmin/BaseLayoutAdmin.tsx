@@ -25,7 +25,7 @@ import { toast } from "react-toastify";
 const BaseLayout = ({ children }: any) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const user = getData("userInfo");
+  const user = getData("user-superadmin");
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -50,8 +50,8 @@ const BaseLayout = ({ children }: any) => {
       .post(`admin-dashboard/logout`, null)
       .finally(() => {})
       .then(() => {
-        removeData("sessionId");
-        removeData("userInfo");
+        removeData("session-superadmin");
+        removeData("user-superadmin");
         toast.success("Berhasil logout, silahkan login kembali");
         navigate(`/admin-dashboard/login`);
       });
@@ -245,7 +245,7 @@ const BaseLayout = ({ children }: any) => {
                 Log Out
               </div>
             </DropdownButton>
-            <label
+            {/* <label
               htmlFor="toggle"
               className="relative inline-block w-10 h-8 cursor-pointer mr-4"
             >
@@ -263,7 +263,7 @@ const BaseLayout = ({ children }: any) => {
                   className="text-gray-700 text-xs"
                 />
               </div>
-            </label>
+            </label> */}
           </div>
         </div>
       </div>

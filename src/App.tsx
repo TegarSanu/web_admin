@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import setupAxios from "./api/setupAxios";
 import "react-toastify/dist/ReactToastify.css";
 import LoadingScreen from "./components/Loading";
@@ -9,14 +14,23 @@ import RoleRouter from "./guard/RoleRouter";
 import Login from "./pages/Login";
 import AdminGuard from "./guard/AdminGuard";
 import SessionGuard from "./guard/SessionGuard";
+import { useLayoutEffect } from "react";
 
-setupAxios();
-
-const App = () => {
+const AppContent = () => {
+  const location = useLocation();
   const loading = useSelector((state: RootState) => state.loading.loading);
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
+
+  const role = location.pathname.split("/")[1]; // ambil 'admin-dashboard' atau 'company-dashboard'
+
+  useLayoutEffect(() => {
+    if (role) {
+      setupAxios(role);
+    }
+  }, [role]);
+
   return (
-    <Router>
+    <>
       <Routes>
         <Route
           path=":role"
@@ -36,7 +50,7 @@ const App = () => {
         />
         <Route path=":role/login" element={<Login />} />
       </Routes>
-      {/* LOADING & TOAST */}
+
       {loading && <LoadingScreen />}
       <ToastContainer
         position="top-right"
@@ -49,8 +63,14 @@ const App = () => {
         theme={darkMode ? "light" : "dark"}
         style={{ zIndex: 9999, fontSize: 12 }}
       />
-    </Router>
+    </>
   );
 };
+
+const App = () => (
+  <Router>
+    <AppContent />
+  </Router>
+);
 
 export default App;

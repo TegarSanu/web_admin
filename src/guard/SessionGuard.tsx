@@ -9,9 +9,12 @@ interface SessionGuardProps {
 const SessionGuard: React.FC<SessionGuardProps> = ({ children }) => {
   const navigate = useNavigate();
   const { role } = useParams();
+  const sessionId =
+    role === "admin-dashboard"
+      ? getData("session-superadmin")
+      : getData("session-company");
 
   useEffect(() => {
-    const sessionId = getData("sessionId");
     if (!sessionId) {
       navigate(`/${role}/login`, { replace: true });
     }

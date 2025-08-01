@@ -58,7 +58,7 @@ const BarChart: React.FC<BarChartProps> = ({
       data: ds.data,
       backgroundColor: ds.color || "#3b82f6",
       borderRadius: 0,
-      barThickness: 500 / datasets.length,
+      barThickness: 300 / datasets.length,
     })),
   };
 

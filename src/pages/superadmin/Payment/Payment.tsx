@@ -65,7 +65,9 @@ const Payment = () => {
       })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
-        const labels = res.data.data.map((item: any) => item.date);
+        const labels = res.data.data.map(
+          (item: any) => `${item.date} (${item.count})`
+        );
         const totalCount = res.data.data.reduce(
           (acc: any, item: any) => acc + item.count,
           0
@@ -94,7 +96,7 @@ const Payment = () => {
 
   useEffect(() => {
     paymentAnalytic();
-  }, [filterAnalytic.endDate, filter.companyId]);
+  }, [filterAnalytic.endDate, filterAnalytic.companyId]);
 
   const handleFilterChange = (key: any, value: any) => {
     if (nameRef.current) {
@@ -193,7 +195,7 @@ const Payment = () => {
                       handleFilterAnalyticChange("startDate", val)
                     }
                     mode="datetime"
-                    value={filter.startDate as any}
+                    value={filterAnalytic.startDate as any}
                   />
                   <DatePickerField
                     title="End Date"
@@ -201,7 +203,7 @@ const Payment = () => {
                       handleFilterAnalyticChange("endDate", val)
                     }
                     mode="datetime"
-                    value={filter.endDate as any}
+                    value={filterAnalytic.endDate as any}
                   />
                 </div>
               </div>
@@ -274,6 +276,9 @@ const Payment = () => {
                   <thead className="border-b border-t bg-gray-50 border-gray-200">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Id Transaksi
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         Nama Company
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
@@ -296,9 +301,8 @@ const Payment = () => {
                         key={payment.id}
                         className="hover:bg-gray-50 transition"
                       >
-                        <td className="px-6 py-4 flex items-center gap-3">
-                          {payment.companyName}
-                        </td>
+                        <td className="px-6 py-4">{payment.transactionId}</td>
+                        <td className="px-6 py-4">{payment.companyName}</td>
                         <td className="px-6 py-4">{payment.paymentMethod}</td>
                         <td className="px-6 py-4">
                           {utcDateTime(payment.expiredAt)}
