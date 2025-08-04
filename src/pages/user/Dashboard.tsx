@@ -13,31 +13,17 @@ import type { RootState } from "../../redux/app/store";
 import DatePickerField from "../../components/DateTimePicker";
 import { formatRupiah } from "../../api/config";
 import BarChart from "../../components/BarChart";
+import DropdownField from "../../components/DropdownField";
 
 const CompanyDashboard = () => {
   const dispatch = useDispatch();
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
-  const [listPayment, setListPayment] = useState<any[]>([]);
   const [dataAnalytic, setDataAnalytic] = useState<any>({});
-  const [dataPayment, setDataPayment] = useState<any>(null);
   const nameRef: any = useRef(null);
-  const [paging, setPaging] = useState({
-    page: 1,
-    size: 10,
-    totalElements: 0,
-    totalPages: 1,
-  });
-  const [filter, setFilter] = useState({
-    type: null,
-    startDate: null,
-    endDate: null,
-    page: 1,
-    size: 10,
-    sortBy: "-createdDate",
-  });
   const [filterAnalytic, setFilterAnalytic] = useState({
     startDate: null,
     endDate: null,
+    status: null,
   });
 
   const paymentAnalytic = () => {
@@ -75,7 +61,7 @@ const CompanyDashboard = () => {
 
   useEffect(() => {
     paymentAnalytic();
-  }, [filterAnalytic.endDate]);
+  }, [filterAnalytic.endDate, filterAnalytic.status]);
 
   const handleFilterAnalyticChange = (key: any, value: any) => {
     if (nameRef.current) {
@@ -108,13 +94,26 @@ const CompanyDashboard = () => {
                 title="Start Date"
                 onChange={(val) => handleFilterAnalyticChange("startDate", val)}
                 mode="datetime"
-                value={filter.startDate as any}
+                value={filterAnalytic.startDate as any}
               />
               <DatePickerField
                 title="End Date"
                 onChange={(val) => handleFilterAnalyticChange("endDate", val)}
                 mode="datetime"
-                value={filter.endDate as any}
+                value={filterAnalytic.endDate as any}
+              />
+              <DropdownField
+                title="Status"
+                placeHolder="Status"
+                value={filterAnalytic.status as any}
+                onChange={(e: any) =>
+                  handleFilterAnalyticChange("status", e == "ALL" ? null : e)
+                }
+                options={[
+                  { label: "All", value: "ALL" },
+                  { label: "REQUESTED", value: "REQUESTED" },
+                  { label: "PAID", value: "PAID" },
+                ]}
               />
             </div>
           </div>

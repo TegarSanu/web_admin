@@ -15,11 +15,13 @@ import Login from "./pages/Login";
 import AdminGuard from "./guard/AdminGuard";
 import SessionGuard from "./guard/SessionGuard";
 import { useLayoutEffect } from "react";
+import NotFoundPage from "./guard/NotFoundPage";
 
 const AppContent = () => {
   const location = useLocation();
   const loading = useSelector((state: RootState) => state.loading.loading);
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
+  const validPath = ["admin-dashboard", "company-dashboard"];
 
   const role = location.pathname.split("/")[1]; // ambil 'admin-dashboard' atau 'company-dashboard'
 
@@ -48,7 +50,16 @@ const AppContent = () => {
             </SessionGuard>
           }
         />
-        <Route path=":role/login" element={<Login />} />
+        <Route
+          path=":role/login"
+          element={
+            role === "admin-dashboard" || role === "company-dashboard" ? (
+              <Login />
+            ) : (
+              <NotFoundPage />
+            )
+          }
+        />
       </Routes>
 
       {loading && <LoadingScreen />}

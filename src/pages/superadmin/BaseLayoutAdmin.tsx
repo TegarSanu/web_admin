@@ -87,7 +87,7 @@ const BaseLayout = ({ children }: any) => {
           icon: faUsers,
           url: `/admin-dashboard/company-user`,
         },
-        { name: "Admin", icon: faUsers, url: `/admin-dashboard/admin` },
+        { name: "Admin", icon: faUserCircle, url: `/admin-dashboard/admin` },
         { name: "Payment", icon: faDollar, url: `/admin-dashboard/payment` },
       ],
     },
@@ -136,7 +136,7 @@ const BaseLayout = ({ children }: any) => {
           } rounded-xl px-4 py-6 flex flex-col`}
         >
           {/* Toggle Button */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="mb-6 flex justify-center">
             {!isSidebarCollapsed ? (
               <img
                 src={
@@ -144,24 +144,16 @@ const BaseLayout = ({ children }: any) => {
                     ? "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%202.png?updatedAt=1752058193676"
                     : "https://ik.imagekit.io/tgrsnbr/Solusi%20parkir%201.png?updatedAt=1752058193679"
                 }
-                className="w-32"
+                className="h-6"
               />
             ) : (
               <img
                 src={
                   "https://ik.imagekit.io/tgrsnbr/Favicon.png?updatedAt=1752058193563"
                 }
-                className="w-5"
+                className="h-9"
               />
             )}
-            <button
-              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
-              className="text-gray-500 dark:text-gray-300"
-            >
-              <FontAwesomeIcon
-                icon={isSidebarCollapsed ? faBars : faChevronLeft}
-              />
-            </button>
           </div>
 
           <div className="mt-2 flex-1 space-y-4 overflow-y-auto">
@@ -216,13 +208,21 @@ const BaseLayout = ({ children }: any) => {
               : "bg-transparent border-transparent"
           }`}
         >
-          <div>
-            <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
-              <FontAwesomeIcon icon={pageInfo.icon} />
-              <span>/</span>
-              <span>{pageInfo.name}</span>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className="text-gray-500 dark:text-gray-300 cursor-pointer w-9 h-9 hover:shadow border hover:bg-gray-50 transition-all dura border-gray-200 rounded-lg"
+            >
+              <FontAwesomeIcon icon={faBars} />
+            </button>
+            <div>
+              <div className="flex gap-2 items-center text-sm text-gray-500 dark:text-gray-400">
+                <FontAwesomeIcon icon={pageInfo.icon} />
+                <span>/</span>
+                <span>{pageInfo.name}</span>
+              </div>
+              <h1 className="font-bold text-xl">{pageInfo.name}</h1>
             </div>
-            <h1 className="font-bold text-xl">{pageInfo.name}</h1>
           </div>
           <div className="flex gap-3 items-center">
             <DropdownButton

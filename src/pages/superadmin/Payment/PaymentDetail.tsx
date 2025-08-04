@@ -5,7 +5,7 @@ import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import TextField from "../../../components/TextField";
 import DropdownField from "../../../components/DropdownField";
-import { utcDateTime } from "../../../api/config";
+import { formatRupiah, utcDateTime } from "../../../api/config";
 
 const PaymentDetail = ({ data, onBack }: any) => {
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
@@ -52,28 +52,28 @@ const PaymentDetail = ({ data, onBack }: any) => {
           </div>
           <div className="w-full grid grid-cols-4 gap-4 mt-4">
             <TextField
-              value={data.amount}
+              value={formatRupiah(data.amount)}
               onChange={(e: any) => {}}
               title="Amount"
               numberOnly
               disabled
             />
             <TextField
-              value={data.amountChargeAggregator}
+              value={formatRupiah(data.amountChargeAggregator)}
               onChange={(e: any) => {}}
               title="Amount Charge Aggregator"
               numberOnly
               disabled
             />
             <TextField
-              value={data.amountChargeCompany}
+              value={formatRupiah(data.amountChargeCompany)}
               onChange={(e: any) => {}}
               title="Amount Charge Company"
               numberOnly
               disabled
             />
             <TextField
-              value={data.amountSettlement}
+              value={formatRupiah(data.amountSettlement)}
               onChange={(e: any) => {}}
               title="Amount Settlemen"
               numberOnly
@@ -98,7 +98,7 @@ const PaymentDetail = ({ data, onBack }: any) => {
           </div>
           <div className="w-full grid grid-cols-3 gap-4 mt-4">
             <TextField
-              value={data.profit}
+              value={formatRupiah(data.profit)}
               onChange={(e: any) => {}}
               title="Profit"
               numberOnly
@@ -127,14 +127,14 @@ const PaymentDetail = ({ data, onBack }: any) => {
               className="w-full grid grid-cols-8 gap-4 items-center justify-between my-4"
             >
               <TextField
-                value={res.maxCharge}
+                value={formatRupiah(res.maxCharge)}
                 onChange={(e: any) => {}}
                 title="Max Charge"
                 numberOnly
                 disabled
               />
               <TextField
-                value={res.minCharge || 0}
+                value={formatRupiah(res.minCharge || 0)}
                 onChange={(e: any) => {}}
                 title="Min Charge"
                 numberOnly
@@ -169,14 +169,14 @@ const PaymentDetail = ({ data, onBack }: any) => {
           </div>
           <div className="w-full grid grid-cols-3 gap-4 mt-4">
             <TextField
-              value={data.paymentMethodConfig?.maxAmount}
+              value={formatRupiah(data.paymentMethodConfig?.maxAmount)}
               onChange={(e: any) => {}}
               title="Nominal Maksimal"
               numberOnly
               disabled
             />
             <TextField
-              value={data.paymentMethodConfig?.minAmount}
+              value={formatRupiah(data.paymentMethodConfig?.minAmount)}
               onChange={(e: any) => {}}
               title="Nominal Minimal"
               numberOnly
@@ -233,14 +233,14 @@ const PaymentDetail = ({ data, onBack }: any) => {
               className="w-full grid grid-cols-8 gap-4 items-center justify-between my-4"
             >
               <TextField
-                value={res.maxCharge}
+                value={formatRupiah(res.maxCharge)}
                 onChange={(e: any) => {}}
                 title="Max Charge"
                 numberOnly
                 disabled
               />
               <TextField
-                value={res.minCharge}
+                value={formatRupiah(res.minCharge)}
                 onChange={(e: any) => {}}
                 title="Min Charge"
                 numberOnly

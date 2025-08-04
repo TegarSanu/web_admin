@@ -73,7 +73,7 @@ const EditAdmin = ({ data, onBack }: any) => {
     >
       <div>
         <div className="w-full p-4 border-b border-gray-200 flex items-center justify-between">
-          <p className="text-xl font-semibold">Edit Data Company</p>
+          <p className="text-xl font-semibold">Edit Data Admin</p>
           <button
             onClick={onBack}
             className="inline-flex items-center px-3 py-1 text-sm font-semibold text-gray-500 hover:text-white rounded-lg border hover:bg-gray-500 focus:outline-none transition"
@@ -84,7 +84,7 @@ const EditAdmin = ({ data, onBack }: any) => {
 
         {/* Form Fields */}
         <div className="w-full p-4">
-          <div className="w-full grid grid-cols-3 gap-4">
+          <div className="w-full grid grid-cols-2 gap-4">
             <TextField
               value={dataAdmin.name}
               onChange={(e: any) => handleChangeValue("name", e)}
@@ -94,16 +94,6 @@ const EditAdmin = ({ data, onBack }: any) => {
               value={password.newPassword}
               onChange={(e: any) => handleChangePassword("newPassword", e)}
               title="Kata Sandi Baru"
-            />
-            <DropdownField
-              title="Deleted ?"
-              placeHolder="Deleted ?"
-              value={dataAdmin.deleted}
-              onChange={(e: any) => handleChangeValue("deleted", e)}
-              options={[
-                { label: "Iya", value: true as any },
-                { label: "Tidak", value: false as any },
-              ]}
             />
           </div>
           <TextField

@@ -1,9 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import axios from "axios";
 import { debounce } from "lodash";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 interface SearchablePickerFieldProps {
-  onChange: (value: string | null) => void; // bisa null jika dihapus
+  onChange: (value: string | null) => void;
   title: string;
   placeHolder?: string;
   id?: string;
@@ -43,7 +45,7 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
     "w-full border rounded-md py-3 px-3 pr-10 bg-transparent focus:outline-none transition-colors border-gray-300";
 
   const fetchOptions = debounce(async (query: string) => {
-    if (!query) {
+    if (!query.trim()) {
       setOptions([]);
       return;
     }
@@ -51,19 +53,11 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
       const res = await axios.get(endpoint, {
         params: { name: query, page: 1 },
       });
-      if (searchQuery.length > 0 || selectedLabel.length > 0) {
-        setOptions(res.data.data);
-      } else {
-        setOptions([]);
-      }
+      setOptions(res.data.data);
     } catch (error) {
       console.error("Failed to fetch options:", error);
     }
   }, 500);
-
-  useEffect(() => {
-    fetchOptions(searchQuery);
-  }, [searchQuery]);
 
   const handleSelect = (item: CompanyResponse) => {
     setSelectedLabel(item.name);
@@ -99,15 +93,18 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
           }, 150);
         }}
         onChange={(e) => {
+          const val = e.target.value;
           setSelectedLabel("");
-          setSearchQuery(e.target.value);
+          setSearchQuery(val);
           setShowDropdown(true);
+          fetchOptions(val);
         }}
         value={selectedLabel || searchQuery}
         className={baseClass}
         disabled={disabled}
         placeholder=""
       />
+
       <label
         htmlFor={id}
         className={`absolute left-3 transition-all pointer-events-none bg-white ${
@@ -117,29 +114,45 @@ const SearchablePickerField: React.FC<SearchablePickerFieldProps> = ({
         {placeHolder || title}
       </label>
 
-      {/* Clear Button */}
-      {selectedLabel && !disabled && (
-        <button
-          type="button"
-          onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-        >
-          &#x2715;
-        </button>
-      )}
+      {/* Dropdown or Clear Icon */}
+      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+        {!selectedLabel || disabled ? (
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
+              showDropdown ? "rotate-180" : ""
+            }`}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="text-gray-400 hover:text-gray-700"
+          >
+            &#x2715;
+          </button>
+        )}
+      </div>
 
-      {showDropdown && options.length > 0 && (
+      {/* Dropdown Options */}
+      {showDropdown && (
         <div className="absolute z-50 bg-white border rounded shadow-md mt-1 w-full max-h-60 overflow-y-auto">
-          {options.map((item) => (
-            <div
-              key={item.id}
-              className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
-              onMouseDown={() => handleSelect(item)}
-            >
-              <div className="font-medium">{item.name}</div>
-              <div className="text-xs text-gray-500">{item.address}</div>
+          {options.length > 0 ? (
+            options.map((item) => (
+              <div
+                key={item.id}
+                className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+                onMouseDown={() => handleSelect(item)}
+              >
+                <div className="font-medium">{item.name}</div>
+                <div className="text-xs text-gray-500">{item.address}</div>
+              </div>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              Ketik untuk mencari...
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>

@@ -105,6 +105,7 @@ const Company = () => {
                   showOnly
                   onChange={() => {}}
                   initialUrls={dataCompany.agreementLink}
+                  initialName={dataCompany.agreementLinkName}
                 />
               </div>
             </div>

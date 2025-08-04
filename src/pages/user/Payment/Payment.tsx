@@ -17,6 +17,8 @@ import DatePickerField from "../../../components/DateTimePicker";
 import SearchablePickerField from "../../../components/SearchablePicker";
 import BaseLayout from "../BaseLayoutCompany";
 import PaymentDetail from "./PaymentDetail";
+import Pagination from "../../../components/Pagination";
+import DropdownField from "../../../components/DropdownField";
 
 const Payment = () => {
   const dispatch = useDispatch();
@@ -35,6 +37,7 @@ const Payment = () => {
     type: null,
     startDate: null,
     endDate: null,
+    status: null,
     page: 1,
     size: 10,
     sortBy: "-createdDate",
@@ -42,6 +45,7 @@ const Payment = () => {
   const [filterAnalytic, setFilterAnalytic] = useState({
     startDate: null,
     endDate: null,
+    status: null,
   });
 
   const getPayment = () => {
@@ -63,7 +67,9 @@ const Payment = () => {
       })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
-        const labels = res.data.data.map((item: any) => item.date);
+        const labels = res.data.data.map(
+          (item: any) => `${item.date} (${item.count})`
+        );
         const totalCount = res.data.data.reduce(
           (acc: any, item: any) => acc + item.count,
           0
@@ -88,11 +94,11 @@ const Payment = () => {
 
   useEffect(() => {
     getPayment();
-  }, [filter.endDate, filter.page, filter.size]);
+  }, [filter.endDate, filter.page, filter.size, filter.status]);
 
   useEffect(() => {
     paymentAnalytic();
-  }, [filterAnalytic.endDate]);
+  }, [filterAnalytic.endDate, filterAnalytic.status]);
 
   const handleFilterChange = (key: any, value: any) => {
     if (nameRef.current) {
@@ -137,28 +143,6 @@ const Payment = () => {
     }));
   };
 
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPage = paging.totalPages;
-    const currentPage = paging.page;
-    for (let i = 1; i <= maxPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded ${
-            i === currentPage
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          } transition`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
-  };
-
   return (
     <BaseLayout>
       {dataPayment ? (
@@ -184,7 +168,7 @@ const Payment = () => {
                       handleFilterAnalyticChange("startDate", val)
                     }
                     mode="datetime"
-                    value={filter.startDate as any}
+                    value={filterAnalytic.startDate as any}
                   />
                   <DatePickerField
                     title="End Date"
@@ -192,7 +176,23 @@ const Payment = () => {
                       handleFilterAnalyticChange("endDate", val)
                     }
                     mode="datetime"
-                    value={filter.endDate as any}
+                    value={filterAnalytic.endDate as any}
+                  />
+                  <DropdownField
+                    title="Status"
+                    placeHolder="Status"
+                    value={filterAnalytic.status as any}
+                    onChange={(e: any) =>
+                      handleFilterAnalyticChange(
+                        "status",
+                        e == "ALL" ? null : e
+                      )
+                    }
+                    options={[
+                      { label: "All", value: "ALL" },
+                      { label: "REQUESTED", value: "REQUESTED" },
+                      { label: "PAID", value: "PAID" },
+                    ]}
                   />
                 </div>
               </div>
@@ -248,6 +248,19 @@ const Payment = () => {
                     mode="datetime"
                     value={filter.endDate as any}
                   />
+                  <DropdownField
+                    title="Status"
+                    placeHolder="Status"
+                    value={filter.status as any}
+                    onChange={(e: any) =>
+                      handleFilterChange("status", e == "ALL" ? null : e)
+                    }
+                    options={[
+                      { label: "All", value: "ALL" },
+                      { label: "REQUESTED", value: "REQUESTED" },
+                      { label: "PAID", value: "PAID" },
+                    ]}
+                  />
                 </div>
               </div>
               {/* Table */}
@@ -264,6 +277,18 @@ const Payment = () => {
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         Metode Pembayaran
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Nominal
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Charge Company
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Charge Aggregator
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Nominal Settlement
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         Expired Dalam
@@ -286,6 +311,18 @@ const Payment = () => {
                           {payment.transactionId}
                         </td>
                         <td className="px-6 py-4">{payment.paymentMethod}</td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amount)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountChargeCompany)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountChargeAggregator)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountSettlement)}
+                        </td>
                         <td className="px-6 py-4">
                           {utcDateTime(payment.expiredAt)}
                         </td>
@@ -321,50 +358,14 @@ const Payment = () => {
               </div>
 
               {/* Pagination Control */}
-              <div className="flex flex-col md:flex-row items-center justify-between p-4 gap-4">
-                {/* Size Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Rows per page:</span>
-                  <select
-                    value={filter.size}
-                    onChange={handleSizeChange}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
-                  >
-                    {[10, 20, 50, 100].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Page Navigation */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(paging.page - 1)}
-                    disabled={paging.page <= 1}
-                    className={`px-3 py-1 rounded ${
-                      paging.page <= 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-500 text-white hover:bg-blue-600"
-                    } transition`}
-                  >
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                  </button>
-                  {renderPageNumbers()}
-                  <button
-                    onClick={() => handlePageChange(paging.page + 1)}
-                    disabled={paging.page >= paging.totalPages}
-                    className={`px-3 py-1 rounded ${
-                      paging.page >= paging.totalPages
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-500 text-white hover:bg-blue-600"
-                    } transition`}
-                  >
-                    <FontAwesomeIcon icon={faAngleRight} />
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                totalItems={paging.totalElements}
+                currentPage={paging.page}
+                totalPages={paging.totalPages}
+                pageSize={filter.size}
+                onPageChange={handlePageChange}
+                onSizeChange={handleSizeChange}
+              />
             </div>
           </div>
         </>

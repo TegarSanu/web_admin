@@ -23,6 +23,7 @@ const AddCompany = () => {
     address: "",
     picName: "",
     picEmail: "",
+    picNumber: "",
     agreementLink: [],
     chargeList: [
       {
@@ -60,6 +61,10 @@ const AddCompany = () => {
     }
     if (!dataCompany.picEmail) {
       toast.error("Email PIC tidak boleh kosong");
+      return;
+    }
+    if (!dataCompany.picNumber) {
+      toast.error("Nomor PIC tidak boleh kosong");
       return;
     }
 
@@ -194,10 +199,11 @@ const AddCompany = () => {
                 multiline
               />
               <div>
-                <p className="mb-2">Upload Dokumen</p>
+                <p className="mb-2">Upload Dokumen Legalitas</p>
                 <PdfUploader
                   onChange={handlePdfChange}
                   initialUrls={dataCompany.agreementLink}
+                  initialName={[]}
                 />
               </div>
               <div>
@@ -220,6 +226,12 @@ const AddCompany = () => {
               value={dataCompany.picEmail}
               onChange={(e: any) => handleChangeValue("picEmail", e)}
               title="Email PIC"
+              className="my-5"
+            />
+            <TextField
+              value={dataCompany.picNumber}
+              onChange={(e: any) => handleChangeValue("picNumber", e)}
+              title="Nomor PIC"
               className="my-5"
             />
 

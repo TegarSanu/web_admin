@@ -83,7 +83,13 @@ const EditCompanyUser = ({ data, onBack }: any) => {
             Kembali
           </button>
         </div>
-        <div className="w-full p-4 grid grid-cols-2 gap-4">
+        <div className="w-full p-4 grid grid-cols-3 gap-4">
+          <TextField
+            value={data.companyName}
+            onChange={(e: any) => {}}
+            title="Nama Company"
+            disabled
+          />
           <TextField
             value={dataAdmin.name}
             onChange={(e: any) => handleChangeValue("name", e)}
@@ -99,7 +105,7 @@ const EditCompanyUser = ({ data, onBack }: any) => {
             onChange={(e: any) => handleChangeValue("note", e)}
             title="Catatan"
             multiline
-            className="col-span-2"
+            className="col-span-3"
           />
         </div>
         <div className="w-full p-4 border-t border-gray-200 flex items-center justify-center">

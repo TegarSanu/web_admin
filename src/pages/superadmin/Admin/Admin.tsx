@@ -5,17 +5,13 @@ import BaseLayout from "../BaseLayoutAdmin";
 import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faAngleLeft,
-  faAngleRight,
-  faPencil,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPencil, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import EditAdmin from "./EditAdmin";
 import TextField from "../../../components/TextField";
 import ConfirmModal from "../../../components/ConfirmModal";
 import { toast } from "react-toastify";
+import Pagination from "../../../components/Pagination";
 
 const Admin = () => {
   const dispatch = useDispatch();
@@ -97,28 +93,6 @@ const Admin = () => {
     }));
   };
 
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPage = paging.totalPages;
-    const currentPage = paging.page;
-    for (let i = 1; i <= maxPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded ${
-            i === currentPage
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          } transition`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
-  };
-
   return (
     <BaseLayout>
       <ConfirmModal
@@ -191,7 +165,10 @@ const Admin = () => {
                 </thead>
                 <tbody>
                   {listAdmin.map((admin) => (
-                    <tr key={admin.id} className="hover:bg-gray-50 transition">
+                    <tr
+                      key={admin.id}
+                      className="hover:bg-gray-50 border-b border-gray-200 transition"
+                    >
                       <td className="px-6 py-4 flex items-center gap-3">
                         {/* <img
                           src={admin.imageUrl}
@@ -230,52 +207,14 @@ const Admin = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination Control */}
-            <div className="flex flex-col md:flex-row items-center justify-between p-4 gap-4">
-              {/* Size Selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Rows per page:</span>
-                <select
-                  value={filter.size}
-                  onChange={handleSizeChange}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
-                >
-                  {[10, 20, 50, 100].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Page Navigation */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(paging.page - 1)}
-                  disabled={paging.page <= 1}
-                  className={`px-3 py-1 rounded ${
-                    paging.page <= 1
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  } transition`}
-                >
-                  <FontAwesomeIcon icon={faAngleLeft} />
-                </button>
-                {renderPageNumbers()}
-                <button
-                  onClick={() => handlePageChange(paging.page + 1)}
-                  disabled={paging.page >= paging.totalPages}
-                  className={`px-3 py-1 rounded ${
-                    paging.page >= paging.totalPages
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  } transition`}
-                >
-                  <FontAwesomeIcon icon={faAngleRight} />
-                </button>
-              </div>
-            </div>
+            <Pagination
+              totalItems={paging.totalElements}
+              currentPage={paging.page}
+              totalPages={paging.totalPages}
+              pageSize={filter.size}
+              onPageChange={handlePageChange}
+              onSizeChange={handleSizeChange}
+            />
           </div>
         </div>
       )}

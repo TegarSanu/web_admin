@@ -5,18 +5,15 @@ import BaseLayout from "../BaseLayoutAdmin";
 import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faAngleLeft,
-  faAngleRight,
-  faEye,
-} from "@fortawesome/free-solid-svg-icons";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
 import { formatRupiah, utcDateTime } from "../../../api/config";
 import BarChart from "../../../components/BarChart";
 import PaymentDetail from "./PaymentDetail";
-import moment from "moment";
-import TextField from "../../../components/TextField";
 import DatePickerField from "../../../components/DateTimePicker";
 import SearchablePickerField from "../../../components/SearchablePicker";
+import Pagination from "../../../components/Pagination";
+import DropdownField from "../../../components/DropdownField";
+import { toast } from "react-toastify";
 
 const Payment = () => {
   const dispatch = useDispatch();
@@ -36,6 +33,7 @@ const Payment = () => {
     type: null,
     startDate: null,
     endDate: null,
+    status: null,
     page: 1,
     size: 10,
     sortBy: "-createdDate",
@@ -44,6 +42,7 @@ const Payment = () => {
     companyId: null,
     startDate: null,
     endDate: null,
+    status: null,
   });
 
   const getPayment = () => {
@@ -90,13 +89,81 @@ const Payment = () => {
       });
   };
 
+  const downloadData = () => {
+    if (!filter.companyId || !filter.startDate || !filter.endDate) {
+      toast.info(
+        "Mohon isi Company, Tanggal Awal, dan Tanggal Akhir terlebih dahulu."
+      );
+      return;
+    }
+    dispatch(setLoading(true));
+    axios
+      .get("admin-dashboard/company", {
+        params: { id: filter.companyId },
+      })
+      .then((companyRes) => {
+        const companyName = companyRes.data?.data[0]?.name || "company";
+        const formatDate = (dateStr: string) => {
+          const date = new Date(dateStr);
+          const day = date.getDate().toString().padStart(2, "0");
+          const month = date.toLocaleString("id-ID", { month: "long" });
+          const year = date.getFullYear();
+          return `${day}-${month}-${year}`;
+        };
+        const fileName = `payment-${companyName}-${formatDate(
+          filter.startDate!
+        )}-to-${formatDate(filter.endDate!)}.xlsx`;
+        return axios
+          .post(
+            "admin-dashboard/payment/payment-download",
+            {
+              companyId: filter.companyId,
+              startDate: filter.startDate,
+              endDate: filter.endDate,
+              type: null,
+              status: null,
+            },
+            {
+              responseType: "blob",
+            }
+          )
+          .then((res) => {
+            const blob = new Blob([res.data], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+          });
+      })
+      .catch((err) => {
+        console.error("Gagal download file:", err);
+        toast.error("Terjadi kesalahan saat mengunduh file.");
+      })
+      .finally(() => {
+        dispatch(setLoading(false));
+      });
+  };
+
   useEffect(() => {
     getPayment();
-  }, [filter.endDate, filter.companyId, filter.page, filter.size]);
+  }, [
+    filter.startDate,
+    filter.endDate,
+    filter.companyId,
+    filter.page,
+    filter.size,
+    filter.status,
+  ]);
 
   useEffect(() => {
     paymentAnalytic();
-  }, [filterAnalytic.endDate, filterAnalytic.companyId]);
+  }, [filterAnalytic.endDate, filterAnalytic.companyId, filterAnalytic.status]);
 
   const handleFilterChange = (key: any, value: any) => {
     if (nameRef.current) {
@@ -141,28 +208,6 @@ const Payment = () => {
     }));
   };
 
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPage = paging.totalPages;
-    const currentPage = paging.page;
-    for (let i = 1; i <= maxPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded ${
-            i === currentPage
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          } transition`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
-  };
-
   return (
     <BaseLayout>
       {dataPayment ? (
@@ -190,7 +235,7 @@ const Payment = () => {
                     }
                   />
                   <DatePickerField
-                    title="Start Date"
+                    title="Tanggal Awal"
                     onChange={(val) =>
                       handleFilterAnalyticChange("startDate", val)
                     }
@@ -198,12 +243,28 @@ const Payment = () => {
                     value={filterAnalytic.startDate as any}
                   />
                   <DatePickerField
-                    title="End Date"
+                    title="Tanggal Akhir"
                     onChange={(val) =>
                       handleFilterAnalyticChange("endDate", val)
                     }
                     mode="datetime"
                     value={filterAnalytic.endDate as any}
+                  />
+                  <DropdownField
+                    title="Status"
+                    placeHolder="Status"
+                    value={filterAnalytic.status as any}
+                    onChange={(e: any) =>
+                      handleFilterAnalyticChange(
+                        "status",
+                        e == "ALL" ? null : e
+                      )
+                    }
+                    options={[
+                      { label: "All", value: "ALL" },
+                      { label: "REQUESTED", value: "REQUESTED" },
+                      { label: "PAID", value: "PAID" },
+                    ]}
                   />
                 </div>
               </div>
@@ -245,6 +306,7 @@ const Payment = () => {
                   <p className="text-xl font-semibold">Data Payment</p>
                 </div>
               </div>
+
               <div className="w-full p-4">
                 <div className="grid grid-cols-3 gap-4">
                   <SearchablePickerField
@@ -253,18 +315,39 @@ const Payment = () => {
                     onChange={(id) => handleFilterChange("companyId", id)}
                   />
                   <DatePickerField
-                    title="Start Date"
+                    title="Tanggal Awal"
                     onChange={(val) => handleFilterChange("startDate", val)}
                     mode="datetime"
                     value={filter.startDate as any}
                   />
                   <DatePickerField
-                    title="End Date"
+                    title="Tanggal Akhir"
                     onChange={(val) => handleFilterChange("endDate", val)}
                     mode="datetime"
                     value={filter.endDate as any}
                   />
+                  <DropdownField
+                    title="Status"
+                    placeHolder="Status"
+                    value={filter.status as any}
+                    onChange={(e: any) =>
+                      handleFilterChange("status", e == "ALL" ? null : e)
+                    }
+                    options={[
+                      { label: "All", value: "ALL" },
+                      { label: "REQUESTED", value: "REQUESTED" },
+                      { label: "PAID", value: "PAID" },
+                    ]}
+                  />
                 </div>
+              </div>
+              <div className="w-full p-4 flex justify-end">
+                <button
+                  onClick={() => downloadData()}
+                  className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg shadow-sm hover:bg-blue-600 focus:outline-none transition"
+                >
+                  Download
+                </button>
               </div>
               {/* Table */}
               <div className="overflow-x-auto border-b border-gray-200">
@@ -285,6 +368,21 @@ const Payment = () => {
                         Metode Pembayaran
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Nominal
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Charge Company
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Charge Aggregator
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Nominal Settlement
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        Profit
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         Expired Dalam
                       </th>
                       <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
@@ -299,11 +397,26 @@ const Payment = () => {
                     {listPayment.map((payment) => (
                       <tr
                         key={payment.id}
-                        className="hover:bg-gray-50 transition"
+                        className="hover:bg-gray-50 transition border-b border-gray-200"
                       >
                         <td className="px-6 py-4">{payment.transactionId}</td>
                         <td className="px-6 py-4">{payment.companyName}</td>
                         <td className="px-6 py-4">{payment.paymentMethod}</td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amount)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountChargeCompany)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountChargeAggregator)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.amountSettlement)}
+                        </td>
+                        <td className="px-6 py-4">
+                          {formatRupiah(payment.profit)}
+                        </td>
                         <td className="px-6 py-4">
                           {utcDateTime(payment.expiredAt)}
                         </td>
@@ -327,7 +440,7 @@ const Payment = () => {
                     {listPayment.length === 0 && (
                       <tr>
                         <td
-                          colSpan={5}
+                          colSpan={11}
                           className="text-center py-12 text-gray-500"
                         >
                           No listPayment available.
@@ -337,52 +450,14 @@ const Payment = () => {
                   </tbody>
                 </table>
               </div>
-
-              {/* Pagination Control */}
-              <div className="flex flex-col md:flex-row items-center justify-between p-4 gap-4">
-                {/* Size Selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">Rows per page:</span>
-                  <select
-                    value={filter.size}
-                    onChange={handleSizeChange}
-                    className="border border-gray-300 rounded px-2 py-1 text-sm"
-                  >
-                    {[10, 20, 50, 100].map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Page Navigation */}
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handlePageChange(paging.page - 1)}
-                    disabled={paging.page <= 1}
-                    className={`px-3 py-1 rounded ${
-                      paging.page <= 1
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-500 text-white hover:bg-blue-600"
-                    } transition`}
-                  >
-                    <FontAwesomeIcon icon={faAngleLeft} />
-                  </button>
-                  {renderPageNumbers()}
-                  <button
-                    onClick={() => handlePageChange(paging.page + 1)}
-                    disabled={paging.page >= paging.totalPages}
-                    className={`px-3 py-1 rounded ${
-                      paging.page >= paging.totalPages
-                        ? "bg-gray-300 text-gray-500"
-                        : "bg-blue-500 text-white hover:bg-blue-600"
-                    } transition`}
-                  >
-                    <FontAwesomeIcon icon={faAngleRight} />
-                  </button>
-                </div>
-              </div>
+              <Pagination
+                totalItems={paging.totalElements}
+                currentPage={paging.page}
+                totalPages={paging.totalPages}
+                pageSize={filter.size}
+                onPageChange={handlePageChange}
+                onSizeChange={handleSizeChange}
+              />
             </div>
           </div>
         </>

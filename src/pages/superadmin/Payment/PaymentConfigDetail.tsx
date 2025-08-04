@@ -5,7 +5,7 @@ import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import TextField from "../../../components/TextField";
 import DropdownField from "../../../components/DropdownField";
-import { utcDateTime } from "../../../api/config";
+import { formatRupiah, utcDateTime } from "../../../api/config";
 
 const PaymentConfigDetail = ({ data, onBack }: any) => {
   const darkMode = useSelector((state: RootState) => state.darkMode.darkMode);
@@ -58,14 +58,14 @@ const PaymentConfigDetail = ({ data, onBack }: any) => {
           </div>
           <div className="w-full grid grid-cols-3 gap-4 mt-4">
             <TextField
-              value={data.minAmount}
+              value={formatRupiah(data.minAmount)}
               onChange={(e: any) => {}}
               title="Min Amount"
               numberOnly
               disabled
             />
             <TextField
-              value={data.maxAmount}
+              value={formatRupiah(data.maxAmount)}
               onChange={(e: any) => {}}
               title="Max Amount"
               numberOnly
@@ -100,14 +100,14 @@ const PaymentConfigDetail = ({ data, onBack }: any) => {
               className="w-full grid grid-cols-8 gap-4 items-center justify-between my-4"
             >
               <TextField
-                value={res.maxCharge}
+                value={formatRupiah(res.maxCharge)}
                 onChange={(e: any) => {}}
                 title="Max Charge"
                 numberOnly
                 disabled
               />
               <TextField
-                value={res.minCharge || 0}
+                value={formatRupiah(res.minCharge || 0)}
                 onChange={(e: any) => {}}
                 title="Min Charge"
                 numberOnly

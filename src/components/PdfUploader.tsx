@@ -6,21 +6,30 @@ import React, { useRef, useState, useEffect } from "react";
 interface PdfUploaderProps {
   onChange: (urls: string[]) => void;
   initialUrls?: string[];
+  initialName?: string[];
   showOnly?: boolean;
 }
 
 const PdfUploader: React.FC<PdfUploaderProps> = ({
   onChange,
   initialUrls = [],
+  initialName = [],
   showOnly = false,
 }) => {
   const [fileUrls, setFileUrls] = useState<string[]>(initialUrls);
+  const [fileName, setFileName] = useState<string[]>(initialName);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setFileUrls(initialUrls);
   }, [initialUrls]);
+
+  useEffect(() => {
+    if (initialName.length > 0) {
+      setFileName(initialName);
+    }
+  }, [initialName]);
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -34,6 +43,7 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({
 
     setIsUploading(true);
     const uploadedUrls: string[] = [];
+    const uploadedName: string[] = [];
 
     try {
       for (const file of Array.from(files)) {
@@ -42,11 +52,14 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({
         await axios.post(`sys/file`, formData).then((res) => {
           const data = res.data.data;
           uploadedUrls.push(data.url);
+          uploadedName.push(data.name);
         });
       }
 
       const updatedUrls = [...fileUrls, ...uploadedUrls];
+      const updatedName = [...fileName, ...uploadedName];
       setFileUrls(updatedUrls);
+      setFileName(updatedName);
       onChange(updatedUrls);
     } finally {
       setIsUploading(false);
@@ -68,15 +81,16 @@ const PdfUploader: React.FC<PdfUploaderProps> = ({
               key={index}
               className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded"
             >
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-2 items-center max-w-[80%]">
                 <FontAwesomeIcon icon={faFilePdf} />
                 <a
+                  title={fileName[index]}
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 hover:underline truncate"
                 >
-                  PDF {index + 1}
+                  {fileName[index]}
                 </a>
               </div>
               {!showOnly && (

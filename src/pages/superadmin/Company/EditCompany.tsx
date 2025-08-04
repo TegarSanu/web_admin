@@ -44,6 +44,10 @@ const EditCompany = ({ data, onBack }: any) => {
       toast.error("Email PIC tidak boleh kosong");
       return;
     }
+    if (!dataCompany.picNumber) {
+      toast.error("Nomor PIC tidak boleh kosong");
+      return;
+    }
 
     for (let i = 0; i < dataCompany?.chargeList?.length; i++) {
       const charge = dataCompany.chargeList[i];
@@ -191,10 +195,11 @@ const EditCompany = ({ data, onBack }: any) => {
               multiline
             />
             <div>
-              <p className="mb-2">Upload Dokumen</p>
+              <p className="mb-2">Upload Dokumen Legalitas</p>
               <PdfUploader
                 onChange={handlePdfChange}
                 initialUrls={dataCompany.agreementLink}
+                initialName={dataCompany.agreementLinkName}
               />
             </div>
             <div>

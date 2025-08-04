@@ -6,9 +6,9 @@ import type { RootState } from "../../../redux/app/store";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faAngleLeft,
-  faAngleRight,
   faArrowCircleUp,
+  faCheckCircle,
+  faCopy,
   faPencil,
   faSignIn,
 } from "@fortawesome/free-solid-svg-icons";
@@ -17,6 +17,9 @@ import { useNavigate } from "react-router-dom";
 import TextField from "../../../components/TextField";
 import { toast } from "react-toastify";
 import { getData } from "../../../api/config";
+import DropdownField from "../../../components/DropdownField";
+import Pagination from "../../../components/Pagination";
+import Modal from "../../../components/Modal";
 
 const Company = () => {
   const sessionId = getData("session-superadmin");
@@ -33,6 +36,7 @@ const Company = () => {
     totalPages: 1,
   });
   const [filter, setFilter] = useState({
+    archived: false,
     name: "",
     initial: "",
     id: "",
@@ -40,6 +44,9 @@ const Company = () => {
     size: 10,
     sortBy: "-createdDate",
   });
+  const [tokenModalOpen, setTokenModalOpen] = useState(false);
+  const [generatedToken, setGeneratedToken] = useState("");
+  const [id, setId] = useState("");
 
   const getCompany = () => {
     dispatch(setLoading(true));
@@ -49,15 +56,21 @@ const Company = () => {
       .then((res) => {
         setPaging(res.data.paging);
         setCompanies(res.data.data);
+        setGeneratedToken(
+          res.data.data.find((el: any) => el.id === id).apiToken
+        );
       });
   };
 
   const updateToken = (id: string) => {
+    setId(id);
     dispatch(setLoading(true));
     axios
       .post("admin-dashboard/company/token/_update", { id: id })
       .finally(() => dispatch(setLoading(false)))
       .then((res) => {
+        getCompany();
+        setTokenModalOpen(true);
         toast.success("Berhasil update token");
       });
   };
@@ -93,30 +106,8 @@ const Company = () => {
     setFilter((prev) => ({
       ...prev,
       size: newSize,
-      page: 1, // Reset ke page 1 agar aman
+      page: 1,
     }));
-  };
-
-  const renderPageNumbers = () => {
-    const pages = [];
-    const maxPage = paging.totalPages;
-    const currentPage = paging.page;
-    for (let i = 1; i <= maxPage; i++) {
-      pages.push(
-        <button
-          key={i}
-          onClick={() => handlePageChange(i)}
-          className={`px-3 py-1 rounded ${
-            i === currentPage
-              ? "bg-blue-500 text-white font-semibold"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-          } transition`}
-        >
-          {i}
-        </button>
-      );
-    }
-    return pages;
   };
 
   return (
@@ -135,11 +126,9 @@ const Company = () => {
             darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-700"
           }`}
         >
-          <div className="">
+          <div>
             <div className="w-full p-4 border-b border-gray-200 flex items-center justify-between">
-              <div>
-                <p className="text-xl font-semibold">Data Company</p>
-              </div>
+              <p className="text-xl font-semibold">Data Company</p>
             </div>
             <div className="w-full p-4">
               <div className="grid grid-cols-3 gap-4">
@@ -148,21 +137,30 @@ const Company = () => {
                   onChange={(e: any) => handleFilterChange("name", e)}
                 />
                 <TextField
-                  title="Inital"
+                  title="Initial"
                   onChange={(e: any) => handleFilterChange("initial", e)}
+                />
+                <DropdownField
+                  title="Arsip"
+                  placeHolder="Arsip"
+                  value={filter.archived}
+                  onChange={(e: any) => handleFilterChange("archived", e)}
+                  options={[
+                    { label: "Iya", value: true as any },
+                    { label: "Tidak", value: false as any },
+                  ]}
                 />
               </div>
             </div>
             <div className="w-full p-4 flex justify-end">
               <button
                 onClick={() => navigate("add")}
-                className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg shadow-sm hover:bg-blue-600 focus:outline-none transition"
+                className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg shadow-sm hover:bg-blue-600 transition"
               >
                 Tambah
               </button>
             </div>
 
-            {/* Table */}
             <div className="overflow-x-auto border-b border-gray-200">
               <table
                 className={
@@ -175,10 +173,16 @@ const Company = () => {
                       Nama Company
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                      Initial
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                       Alamat
                     </th>
                     <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                       Email
+                    </th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                      Status
                     </th>
                     <th className="px-6 py-4 text-right text-sm font-semibold uppercase tracking-wider">
                       Aksi
@@ -189,7 +193,7 @@ const Company = () => {
                   {companies.map((company) => (
                     <tr
                       key={company.id}
-                      className="hover:bg-gray-50 transition"
+                      className="hover:bg-gray-50 transition border-b border-gray-200"
                     >
                       <td className="px-6 py-4 flex items-center gap-3">
                         <img
@@ -199,41 +203,47 @@ const Company = () => {
                         />
                         {company.name}
                       </td>
+                      <td className="px-6 py-4">{company.initial}</td>
                       <td className="px-6 py-4">{company.address}</td>
                       <td className="px-6 py-4">{company.email}</td>
+                      <td className="px-6 py-4">
+                        {company.archived ? "Arsip" : "Tidak"}
+                      </td>
                       <td className="px-6 py-4 text-right space-x-2">
-                        <button
-                          title={`Login admin company ${company.name}`}
-                          onClick={() =>
-                            window.open(
-                              `/company-dashboard/login?sessionId=${sessionId}&companyId=${company.id}`
-                            )
-                          }
-                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 transition"
-                        >
-                          <FontAwesomeIcon icon={faSignIn} />
-                        </button>
-                        <button
-                          title={`Edit data ${company.name}`}
-                          onClick={() => setEditedCompany(company)}
-                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition"
-                        >
-                          <FontAwesomeIcon icon={faPencil} />
-                        </button>
-                        <button
-                          title={`Update token ${company.name}`}
-                          onClick={() => updateToken(company.id)}
-                          className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded hover:bg-yellow-600 transition"
-                        >
-                          <FontAwesomeIcon icon={faArrowCircleUp} />
-                        </button>
+                        <div className="flex-1 gap-2 flex">
+                          <button
+                            title={`Login admin company ${company.name}`}
+                            onClick={() =>
+                              window.open(
+                                `/company-dashboard/login?sessionId=${sessionId}&companyId=${company.id}`
+                              )
+                            }
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600 transition"
+                          >
+                            <FontAwesomeIcon icon={faSignIn} />
+                          </button>
+                          <button
+                            title={`Edit data ${company.name}`}
+                            onClick={() => setEditedCompany(company)}
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-yellow-500 rounded hover:bg-yellow-600 transition"
+                          >
+                            <FontAwesomeIcon icon={faPencil} />
+                          </button>
+                          <button
+                            title={`Update token ${company.name}`}
+                            onClick={() => updateToken(company.id)}
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-semibold text-white bg-orange-500 rounded hover:bg-yellow-600 transition"
+                          >
+                            <FontAwesomeIcon icon={faArrowCircleUp} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                   {companies.length === 0 && (
                     <tr>
                       <td
-                        colSpan={4}
+                        colSpan={6}
                         className="text-center py-12 text-gray-500"
                       >
                         No companies available.
@@ -244,54 +254,77 @@ const Company = () => {
               </table>
             </div>
 
-            {/* Pagination Control */}
-            <div className="flex flex-col md:flex-row items-center justify-between p-4 gap-4">
-              {/* Size Selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm">Rows per page:</span>
-                <select
-                  value={filter.size}
-                  onChange={handleSizeChange}
-                  className="border border-gray-300 rounded px-2 py-1 text-sm"
-                >
-                  {[10, 20, 50, 100].map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Page Navigation */}
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => handlePageChange(paging.page - 1)}
-                  disabled={paging.page <= 1}
-                  className={`px-3 py-1 rounded ${
-                    paging.page <= 1
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  } transition`}
-                >
-                  <FontAwesomeIcon icon={faAngleLeft} />
-                </button>
-                {renderPageNumbers()}
-                <button
-                  onClick={() => handlePageChange(paging.page + 1)}
-                  disabled={paging.page >= paging.totalPages}
-                  className={`px-3 py-1 rounded ${
-                    paging.page >= paging.totalPages
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-blue-500 text-white hover:bg-blue-600"
-                  } transition`}
-                >
-                  <FontAwesomeIcon icon={faAngleRight} />
-                </button>
-              </div>
-            </div>
+            <Pagination
+              totalItems={paging.totalElements}
+              currentPage={paging.page}
+              totalPages={paging.totalPages}
+              pageSize={filter.size}
+              onPageChange={handlePageChange}
+              onSizeChange={handleSizeChange}
+            />
           </div>
         </div>
       )}
+
+      <Modal open={tokenModalOpen} onClose={() => setTokenModalOpen(false)}>
+        <div className="max-w-2xl w-full">
+          <div className="text-center mb-6">
+            <FontAwesomeIcon
+              size="4x"
+              icon={faCheckCircle}
+              className="text-green-500 text-6xl mb-4"
+            />
+            <h2 className="text-xl font-semibold mb-2">
+              Token berhasil diperbarui
+            </h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Salin token di bawah ini:
+            </p>
+            <div className="bg-gray-100 px-4 py-3 rounded-md flex justify-between items-center text-sm text-gray-800 break-all">
+              <span className="flex-1">{generatedToken}</span>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedToken);
+                  toast.info("Token disalin ke clipboard");
+                }}
+                className="ml-3 text-blue-600 hover:text-blue-800 transition"
+                title="Salin Token"
+              >
+                <FontAwesomeIcon icon={faCopy} />
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md mb-6 text-sm text-gray-800">
+            <p className="font-bold mb-2">PERINGATAN</p>
+            <p className="mb-1">
+              Anda dapat melihat Token Company Anda hanya saat ini saja. Segera
+              simpan dan amankan agar proses integrasi dan akun company Anda
+              terlindungi.
+            </p>
+            <p className="font-semibold mt-4 mb-1">
+              Saran penyimpanan token yang aman:
+            </p>
+            <p>1. Jangan berikan informasi token Anda kepada siapa pun.</p>
+            <p>
+              2. Simpan token Anda pada layanan Manajemen Kunci atau layanan
+              lain yang dapat mengamankan data Anda.
+            </p>
+            <p>
+              3. Pastikan Anda mengingat tempat penyimpanan credential Anda.
+            </p>
+          </div>
+
+          <div className="text-end">
+            <button
+              onClick={() => setTokenModalOpen(false)}
+              className="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </Modal>
     </BaseLayout>
   );
 };
